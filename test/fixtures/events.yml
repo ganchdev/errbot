@@ -1,0 +1,70 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: events
+#
+#  id                 :integer          not null, primary key
+#  environment        :string
+#  event_uuid         :string
+#  exception_message  :string
+#  exception_type     :string
+#  handled            :boolean
+#  level              :string
+#  notification_state :string           default("pending")
+#  notified_at        :datetime
+#  occurred_at        :datetime
+#  raw_json           :text
+#  release            :string
+#  server_name        :string
+#  transaction_name   :string
+#  created_at         :datetime         not null
+#  updated_at         :datetime         not null
+#  issue_id           :integer          not null
+#  project_id         :integer          not null
+#
+# Indexes
+#
+#  index_events_on_event_uuid          (event_uuid)
+#  index_events_on_issue_id            (issue_id)
+#  index_events_on_notification_state  (notification_state)
+#  index_events_on_project_id          (project_id)
+#
+# Foreign Keys
+#
+#  issue_id    (issue_id => issues.id)
+#  project_id  (project_id => projects.id)
+#
+one:
+  project: one
+  issue: one
+  event_uuid: MyString
+  occurred_at: 2026-04-06 00:21:23
+  environment: MyString
+  release: MyString
+  server_name: MyString
+  transaction_name: MyString
+  exception_type: MyString
+  exception_message: MyString
+  handled: false
+  level: MyString
+  raw_json: MyText
+  notification_state: MyString
+  notified_at: 2026-04-06 00:21:23
+
+two:
+  project: two
+  issue: two
+  event_uuid: MyString
+  occurred_at: 2026-04-06 00:21:23
+  environment: MyString
+  release: MyString
+  server_name: MyString
+  transaction_name: MyString
+  exception_type: MyString
+  exception_message: MyString
+  handled: false
+  level: MyString
+  raw_json: MyText
+  notification_state: MyString
+  notified_at: 2026-04-06 00:21:23

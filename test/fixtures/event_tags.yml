@@ -1,0 +1,30 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# == Schema Information
+#
+# Table name: event_tags
+#
+#  id         :integer          not null, primary key
+#  key        :string
+#  value      :string
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  event_id   :integer          not null
+#
+# Indexes
+#
+#  index_event_tags_on_event_id  (event_id)
+#
+# Foreign Keys
+#
+#  event_id  (event_id => events.id)
+#
+one:
+  event: one
+  key: MyString
+  value: MyString
+
+two:
+  event: two
+  key: MyString
+  value: MyString
