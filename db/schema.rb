@@ -15,7 +15,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_05_232127) do
     t.datetime "created_at", null: false
     t.string "email_address"
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.index ["email_address"], name: "index_authorized_users_on_email_address", unique: true
     t.index ["user_id"], name: "index_authorized_users_on_user_id"
   end

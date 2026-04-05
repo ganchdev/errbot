@@ -2,7 +2,7 @@ class CreateAuthorizedUsers < ActiveRecord::Migration[8.2]
   def change
     create_table :authorized_users do |t|
       t.string :email_address
-      t.references :user, null: false, foreign_key: true
+      t.references :user, foreign_key: true
 
       t.timestamps
     end
