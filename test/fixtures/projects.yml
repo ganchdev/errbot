@@ -18,12 +18,12 @@
 #
 one:
   name: MyString
-  slug: MyString
-  ingest_token: MyString
+  slug: one
+  ingest_token: one
   default_environment: MyString
 
 two:
   name: MyString
-  slug: MyString
-  ingest_token: MyString
+  slug: two
+  ingest_token: two
   default_environment: MyString

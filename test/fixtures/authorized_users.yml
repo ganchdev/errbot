@@ -19,9 +19,9 @@
 #  user_id  (user_id => users.id)
 #
 one:
-  email_address: MyString
+  email_address: one@example.com
   user: one
 
 two:
-  email_address: MyString
+  email_address: two@example.com
   user: two
