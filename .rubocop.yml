@@ -29,9 +29,6 @@ Layout/EmptyLinesAroundClassBody:
 Layout/LeadingCommentSpace:
   Enabled: false
 
-Rails/I18nLocaleTexts:
-  Enabled: false
-
 # We want to keep attr_* definitions separated on their own lines, rather than
 # all of them collapsed into a single attr_* call. The collapsed/grouped variant
 # is harder to read, and harder to see what's been changed in diffs.
