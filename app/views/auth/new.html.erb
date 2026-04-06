@@ -1,0 +1,5 @@
+<h1>Sign in to Errbot</h1>
+<p>Use your Google account to sign in.</p>
+<%= form_tag "/auth/google_oauth2", data: { turbo: false } do %>
+  <%= submit_tag "Sign in with Google" %>
+<% end %>

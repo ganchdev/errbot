@@ -17,5 +17,6 @@
 class User < ApplicationRecord
 
   has_one :authorized_user, dependent: :destroy
+  has_many :sessions, dependent: :destroy
 
 end

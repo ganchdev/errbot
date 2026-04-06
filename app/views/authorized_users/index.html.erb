@@ -1,0 +1,23 @@
+<h1>User Authorizations</h1>
+<% if @authorized_users.empty? %>
+  <p>No authorized users yet.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>User</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @authorized_users.each do |au| %>
+        <tr>
+          <td><%= au.email_address %></td>
+          <td><%= au.user ? au.user.name : "Not linked" %></td>
+          <td><%= au.created_at.strftime("%Y-%m-%d") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

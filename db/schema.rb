@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_05_232127) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_05_235420) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -85,6 +85,15 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_05_232127) do
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end
 
+  create_table "sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.boolean "admin"
     t.datetime "created_at", null: false
@@ -101,4 +110,5 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_05_232127) do
   add_foreign_key "events", "issues"
   add_foreign_key "events", "projects"
   add_foreign_key "issues", "projects"
+  add_foreign_key "sessions", "users"
 end
