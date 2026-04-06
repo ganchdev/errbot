@@ -28,8 +28,6 @@ gem "dotenv-rails", "3.2.0"
 
 gem "annotaterb", "4.14.0"
 
-gem "kamal", "2.11.0", require: false
-
 gem "thruster", "0.1.20", require: false
 
 gem "image_processing", "1.14.0"
