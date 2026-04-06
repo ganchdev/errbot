@@ -1,0 +1,17 @@
+<div>
+  <div>
+    <% if @error %>
+      <div>
+        <%= @error %>
+      </div>
+      <p>Please contact the administrator.</p>
+    <% else %>
+      <h1>Verify Telegram Account</h1>
+      <p>Enter this code in your Telegram chat to link your account:</p>
+      <div>
+        <code><%= @code %></code>
+      </div>
+      <p>This code expires in 10 minutes.</p>
+    <% end %>
+  </div>
+</div>

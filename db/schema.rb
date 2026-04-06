@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_05_235420) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_06_000000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -18,6 +18,19 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_05_235420) do
     t.integer "user_id"
     t.index ["email_address"], name: "index_authorized_users_on_email_address", unique: true
     t.index ["user_id"], name: "index_authorized_users_on_user_id"
+  end
+
+  create_table "bot_users", force: :cascade do |t|
+    t.string "api_token"
+    t.integer "authorized_user_id", null: false
+    t.string "chat_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_token"], name: "index_bot_users_on_api_token", unique: true
+    t.index ["authorized_user_id"], name: "index_bot_users_on_authorized_user_id"
+    t.index ["chat_id", "code"], name: "index_bot_users_on_chat_id_and_code"
   end
 
   create_table "event_tags", force: :cascade do |t|
@@ -106,6 +119,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_05_235420) do
   end
 
   add_foreign_key "authorized_users", "users"
+  add_foreign_key "bot_users", "authorized_users"
   add_foreign_key "event_tags", "events"
   add_foreign_key "events", "issues"
   add_foreign_key "events", "projects"
