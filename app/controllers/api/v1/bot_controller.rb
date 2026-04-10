@@ -2,8 +2,9 @@
 
 module Api
   module V1
-    class BotController < ActionController::Base
+    class BotController < ActionController::API
 
+      before_action :authenticate_api_token
       skip_before_action :authenticate_api_token, only: [:verify]
 
       def verify
@@ -21,7 +22,7 @@ module Api
               id: user.id,
               email: user.email_address
             },
-            token: bot_user.token
+            token: bot_user.api_token
           }
         else
           render json: { success: false, error: "Invalid or expired code" }, status: :unauthorized

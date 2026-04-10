@@ -1,24 +1,29 @@
-# README
+# Errbot
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Errbot is a small Rails exception tracker for personal and low-traffic apps. It stores exception events in SQLite, groups them into issues, and is intended to send Telegram alerts in the next phase.
 
-Things you may want to cover:
+## Phase 1 Collector
 
-* Ruby version
+The collector currently accepts exception events through:
 
-* System dependencies
+- `POST /api/v1/events` with `Authorization: Bearer <project_token>`
+- `POST /api/:project_id/store` with `sentry_key=<project_token>`
+- `POST /api/:project_id/envelope` with `sentry_key=<project_token>`
 
-* Configuration
+The Sentry-compatible endpoints are intentionally narrow. They parse basic exception events from Sentry `store` and `envelope` requests, then normalize them into the same internal event shape as the custom JSON endpoint. Transactions, attachments, profiling, replay, and release health payloads are out of scope for Phase 1.
 
-* Database creation
+## Development
 
-* Database initialization
+Run the test suite:
 
-* How to run the test suite
+```sh
+bin/rails test
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+Run the app locally:
 
-* Deployment instructions
+```sh
+bin/dev
+```
 
-* ...
+See [docs/errbot-simplified.md](docs/errbot-simplified.md) for the active implementation plan and [docs/errbot.md](docs/errbot.md) for the larger product spec.

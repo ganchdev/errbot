@@ -72,13 +72,16 @@ Each SDK transport maps the Sentry event into a custom JSON shape before POSTing
 
 ## Recommended approach
 
-Start with **Option B**.
+Start with a **hybrid of Option B and a very small subset of Option A**.
 
 Reason:
 - The intended use is small-scale and personal
 - Simplicity is more important than protocol purity
 - The backend should remain tiny
 - Most value comes from the client-side capture, not server-side protocol compatibility
+- A thin Sentry `store`/`envelope` parser makes it possible to point basic SDK DSNs at Errbot without committing to full Sentry protocol support
+
+The Phase 1 implementation should continue to normalize everything into the same internal event shape before persistence.
 
 ---
 
@@ -414,9 +417,17 @@ This is the payload the custom client transport should POST to the backend.
 
 # Ingestion API spec
 
-## Endpoint
+## Endpoints
+
+Custom transport endpoint:
 
 `POST /api/v1/events`
+
+Thin Sentry-compatible endpoints:
+
+`POST /api/:project_id/store`
+
+`POST /api/:project_id/envelope`
 
 ## Authentication
 
@@ -434,9 +445,22 @@ Alternative:
 
 Header-based auth is preferred.
 
+For the Sentry-compatible endpoints, use the project `ingest_token` as the Sentry key:
+
+* `X-Sentry-Auth: Sentry sentry_version=7, sentry_key=<project_token>`
+* or `?sentry_key=<project_token>`
+
+The `:project_id` path segment can be the Errbot project id or slug.
+
 ## Request content type
 
+Custom and Sentry store requests use:
+
 `application/json`
+
+Sentry envelope requests use:
+
+`application/x-sentry-envelope`
 
 ## Response
 
@@ -458,7 +482,9 @@ Header-based auth is preferred.
 
 ### Invalid payload
 
-`422 Unprocessable Entity`
+`400 Bad Request`
+
+Returned when the payload is malformed, contains no exception data, or contains an unsupported Sentry item such as a transaction.
 
 ---
 
@@ -929,7 +955,7 @@ Only add if real use demands it.
 * email alerts
 * saved filters
 * source maps or better JS handling
-* raw Sentry envelope support
+* broader Sentry envelope support
 
 ---
 
@@ -978,6 +1004,13 @@ Build `POST /api/v1/events`.
 * normalize event
 * scrub sensitive fields
 * persist event and issue in one transaction
+
+Also expose the narrow Sentry-compatible routes:
+
+* `POST /api/:project_id/store`
+* `POST /api/:project_id/envelope`
+
+These routes should only parse exception events and then hand the normalized payload to the same ingestion service as the custom endpoint.
 
 ## Step 4: Implement grouping service
 

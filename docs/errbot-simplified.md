@@ -1,6 +1,6 @@
 # Errbot — Simplified Implementation Plan
 
-A minimal self-hosted exception tracker using Sentry SDKs with custom transport → custom backend → SQLite + Telegram alerts.
+A minimal self-hosted exception tracker using Sentry SDKs → custom backend → SQLite + Telegram alerts.
 
 ---
 
@@ -26,13 +26,16 @@ A minimal self-hosted exception tracker using Sentry SDKs with custom transport 
 
 ### Phase 1 — Core Collector
 
-- [ ] Create `POST /api/v1/events` endpoint
-- [ ] Authenticate project via `Authorization: Bearer <token>`
-- [ ] Parse and validate JSON payload
-- [ ] Implement fingerprint hashing (exception type + top in-app frame + function + lineno)
-- [ ] Create/find Issue based on fingerprint
-- [ ] Create Event record with raw JSON
-- [ ] Add Project model with ingest_token
+- [x] Create `POST /api/v1/events` endpoint
+- [x] Authenticate project via `Authorization: Bearer <token>`
+- [x] Parse and validate JSON payload
+- [x] Implement fingerprint hashing (exception type + top in-app frame + function + lineno)
+- [x] Create/find Issue based on fingerprint
+- [x] Create Event record with raw JSON
+- [x] Add Project model with ingest_token
+- [x] Reject non-exception events (transactions)
+- [x] Add thin Sentry-compatible ingest routes for SDK `store` and `envelope` requests
+- [x] Normalize custom and Sentry exception payloads through shared ingestion services
 
 ### Phase 2 — Telegram Alerts
 
@@ -104,7 +107,18 @@ A minimal self-hosted exception tracker using Sentry SDKs with custom transport 
 - [ ] Implement code verification in bot → generate token
 - [ ] Add token to Authorization header for bot webhook requests
 
-**POST /api/v1/events**
+## Phase 1 Ingestion API
+
+Errbot supports two Phase 1 ingestion modes:
+
+1. A small custom JSON API for simple clients and custom transports.
+2. A narrow Sentry-compatible API for clients that can point a DSN at Errbot.
+
+This is not full Sentry protocol compatibility. Phase 1 only extracts exception event items and rejects transactions or other non-exception payloads.
+
+### Custom JSON Endpoint
+
+**POST `/api/v1/events`**
 
 ```
 Authorization: Bearer <project_token>
@@ -134,6 +148,33 @@ Content-Type: application/json
 
 **Response**: `201 Created` → `{ "ok": true, "issue_id": 123, "event_id": "..." }`
 
+### Sentry-Compatible Endpoints
+
+These endpoints exist so Sentry SDKs can send basic exception events to Errbot:
+
+- `POST /api/:project_id/store`
+- `POST /api/:project_id/envelope`
+
+Authentication uses the project `ingest_token` as the Sentry public key:
+
+- `X-Sentry-Auth: Sentry sentry_version=7, sentry_key=<project_token>`
+- or `?sentry_key=<project_token>`
+
+The `:project_id` path segment can be the Errbot project id or slug. For a DSN-like setup, use the `ingest_token` as the public key and the project slug/id as the DSN project id.
+
+Accepted Sentry shapes:
+
+- Store payloads with `exception.values`
+- Envelope payloads containing an item with `"type": "event"` or `"type": "error"`
+
+Unsupported Phase 1 shapes:
+
+- transactions
+- attachments
+- profiles
+- replays
+- release health/session items
+
 ---
 
 ## Grouping Algorithm
@@ -142,3 +183,11 @@ Content-Type: application/json
 2. Find first stack frame where `in_app == true`
 3. Join: `type|filename|function|lineno`
 4. SHA256 hash → fingerprint_hash
+5. If there is no in-app frame, fall back to hashing the exception type only
+
+---
+
+## Constraints
+
+- **Only exception events accepted** — transactions (performance events without exceptions) are rejected with `400 Bad Request`
+- **Not full Sentry** — Phase 1 only parses the basic event data needed for grouping, storage, and later Telegram alerts

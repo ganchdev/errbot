@@ -2,10 +2,13 @@
 
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
+  post "/api/:project_id/store", to: "api/v1/events#create_sentry_store"
+  post "/api/:project_id/envelope", to: "api/v1/events#create_sentry_envelope"
 
   namespace :api do
     namespace :v1 do
       post "bot/verify", to: "bot#verify"
+      post "events", to: "events#create"
     end
   end
 
