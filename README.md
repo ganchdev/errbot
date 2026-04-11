@@ -26,4 +26,12 @@ Run the app locally:
 bin/dev
 ```
 
+Run the Telegram bot poller locally:
+
+```sh
+bin/telegram
+```
+
+The poller uses long polling against the Telegram Bot API and expects `TELEGRAM_BOT_TOKEN` in your environment. For this first Phase 2 step it only responds to `/start`, which gives us a simple end-to-end check that the integration is working before we add account-linking and alert delivery.
+
 See [docs/errbot-simplified.md](docs/errbot-simplified.md) for the active implementation plan and [docs/errbot.md](docs/errbot.md) for the larger product spec.

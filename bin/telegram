@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../config/environment"
+require "active_support/tagged_logging"
+require "telegram/poller"
+require "telegram/update_handler"
+
+$stdout.sync = true
+
+bot_token = ENV.fetch("TELEGRAM_BOT_TOKEN") do
+  raise "Missing TELEGRAM_BOT_TOKEN"
+end
+
+timeout = ENV.fetch("TELEGRAM_POLL_TIMEOUT", Telegram::Poller::DEFAULT_TIMEOUT_SECONDS).to_i
+error_backoff = ENV.fetch("TELEGRAM_POLL_ERROR_BACKOFF", Telegram::Poller::DEFAULT_BACKOFF_SECONDS).to_i
+
+stdout_logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new($stdout))
+stdout_logger.level = Rails.logger.level
+
+client = Telegram::Client.new(bot_token: bot_token, logger: stdout_logger)
+handler = Telegram::UpdateHandler.new(client: client, logger: stdout_logger)
+
+Telegram::Poller.new(
+  client: client,
+  handler: handler,
+  logger: stdout_logger,
+  timeout: timeout,
+  error_backoff: error_backoff
+).run

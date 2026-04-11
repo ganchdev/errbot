@@ -39,7 +39,7 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 
 ### Phase 2 — Telegram Alerts
 
-- [ ] Create Telegram bot integration
+- [x] Create Telegram bot integration
 - [ ] Build notification worker (background loop)
 - [ ] Send alert on new issue first occurrence
 - [ ] Send alert when resolved issue reappears
