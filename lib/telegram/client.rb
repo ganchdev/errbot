@@ -25,8 +25,14 @@ module Telegram
       request("getUpdates", payload)
     end
 
-    def send_message(chat_id:, text:)
-      request("sendMessage", { chat_id: chat_id, text: text })
+    # Sends a message to a Telegram chat.
+    #
+    # @param chat_id [String, Integer]
+    # @param text [String]
+    # @param options [Hash]
+    # @return [Hash]
+    def send_message(chat_id:, text:, **options)
+      request("sendMessage", { chat_id: chat_id, text: text }.merge(options))
     end
 
     private

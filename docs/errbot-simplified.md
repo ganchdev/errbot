@@ -40,10 +40,16 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 ### Phase 2 — Telegram Alerts
 
 - [x] Create Telegram bot integration
+- [x] Run BotUser migration
+- [x] Create `/bot/verify` page (OAuth required)
+- [x] Implement bot `/start` handler → ask for email
+- [x] Implement email lookup in bot → send verification link
+- [x] Implement code verification in bot → generate token
 - [ ] Build notification worker (background loop)
 - [ ] Send alert on new issue first occurrence
 - [ ] Send alert when resolved issue reappears
 - [ ] Handle failed notifications with retry
+- [ ] Add token to Authorization header for bot API requests
 
 ### Phase 3 — Web UI
 
@@ -70,7 +76,7 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 | event_tags | id, event_id, key, value |
 | users | id, email_address, name, admin |
 | authorized_users | id, email_address, user_id |
-| bot_users | id, authorized_user_id, code, token, chat_id, expires_at |
+| bot_users | id, authorized_user_id, code, api_token, chat_id, expires_at, linked_at |
 
 ---
 
@@ -84,28 +90,15 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 2. Bot asks: "Enter your email address"
 3. User enters email → bot checks `authorized_users` table
 4. If email found → bot sends link to `/bot/verify` (requires Google OAuth login)
-5. User clicks link, logs in via Google, sees 6-digit verification code
+5. User clicks link, logs in via Google with the same authorized email, sees 6-digit verification code
 6. User pastes code in bot → bot verifies code
 7. On success → bot generates `SecureRandom.alphanumeric(32)` token, confirms "Linked!"
 
 **Security**:
 - Bot ignores messages from users not in `authorized_users`
 - Verification codes expire after 10 minutes
-- Telegram webhook authenticated via `Authorization: Bearer <token>` header
+- Linked bot API requests are authenticated via `Authorization: Bearer <token>` header
 - Tokens can be revoked/rotated per user in admin UI
-
----
-
-## Tasks (Continued)
-
-### Phase 2 — Telegram Alerts (Continued)
-
-- [ ] Run BotUser migration
-- [x] Create `/bot/verify` page (OAuth required)
-- [x] Implement bot `/start` handler → ask for email
-- [x] Implement email lookup in bot → send verification link
-- [x] Implement code verification in bot → generate token
-- [ ] Add token to Authorization header for bot webhook requests
 
 ## Phase 1 Ingestion API
 

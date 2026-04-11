@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_11_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_11_133000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_11_120000) do
     t.boolean "handled"
     t.integer "issue_id", null: false
     t.string "level"
+    t.string "notification_reason"
     t.string "notification_state", default: "pending"
     t.datetime "notified_at"
     t.datetime "occurred_at"
@@ -64,6 +65,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_11_120000) do
     t.datetime "updated_at", null: false
     t.index ["event_uuid"], name: "index_events_on_event_uuid"
     t.index ["issue_id"], name: "index_events_on_issue_id"
+    t.index ["notification_reason"], name: "index_events_on_notification_reason"
     t.index ["notification_state"], name: "index_events_on_notification_state"
     t.index ["project_id"], name: "index_events_on_project_id"
   end
