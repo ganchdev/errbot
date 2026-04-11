@@ -5,6 +5,7 @@ AllCops:
     - "vendor/**/*"
     - "bin/*"
     - "db/**/*"
+    - "config/environments/development.rb"
 
 # Always use double quotes
 Style/StringLiterals:
