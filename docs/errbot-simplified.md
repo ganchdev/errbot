@@ -45,11 +45,11 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 - [x] Implement bot `/start` handler → ask for email
 - [x] Implement email lookup in bot → send verification link
 - [x] Implement code verification in bot → generate token
-- [ ] Build notification worker (background loop)
-- [ ] Send alert on new issue first occurrence
-- [ ] Send alert when resolved issue reappears
-- [ ] Handle failed notifications with retry
-- [ ] Add token to Authorization header for bot API requests
+- [x] Build notification worker (background loop)
+- [x] Send alert on new issue first occurrence
+- [x] Send alert when resolved issue reappears
+- [x] Handle failed notifications with retry
+- [~] Add token to Authorization header for bot API requests (won't do for current polling-based bot setup)
 
 ### Phase 3 — Web UI
 
