@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_06_000000) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_11_120000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -27,10 +27,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_06_000000) do
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
+    t.datetime "linked_at"
     t.datetime "updated_at", null: false
     t.index ["api_token"], name: "index_bot_users_on_api_token", unique: true
     t.index ["authorized_user_id"], name: "index_bot_users_on_authorized_user_id"
     t.index ["chat_id", "code"], name: "index_bot_users_on_chat_id_and_code"
+    t.index ["linked_at"], name: "index_bot_users_on_linked_at"
   end
 
   create_table "event_tags", force: :cascade do |t|

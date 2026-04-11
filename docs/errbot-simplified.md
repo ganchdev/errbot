@@ -101,10 +101,10 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 ### Phase 2 — Telegram Alerts (Continued)
 
 - [ ] Run BotUser migration
-- [ ] Create `/bot/verify` page (OAuth required)
-- [ ] Implement bot `/start` handler → ask for email
-- [ ] Implement email lookup in bot → send verification link
-- [ ] Implement code verification in bot → generate token
+- [x] Create `/bot/verify` page (OAuth required)
+- [x] Implement bot `/start` handler → ask for email
+- [x] Implement email lookup in bot → send verification link
+- [x] Implement code verification in bot → generate token
 - [ ] Add token to Authorization header for bot webhook requests
 
 ## Phase 1 Ingestion API

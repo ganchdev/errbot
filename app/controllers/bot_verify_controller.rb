@@ -4,7 +4,7 @@ class BotVerifyController < ApplicationController
 
   def show
     @chat_id = params[:chat_id]
-    @email = params[:email]
+    @email = params[:email].to_s.downcase
 
     return redirect_to "/auth", alert: "Missing chat_id or email" if @chat_id.blank? || @email.blank?
 
@@ -15,10 +15,12 @@ class BotVerifyController < ApplicationController
       return
     end
 
-    bot_user = BotUser.find_or_initialize_by(chat_id: @chat_id)
-    bot_user.authorized_user = @authorized_user
-    bot_user.save!
+    unless Current.user&.email_address.to_s.downcase == @authorized_user.email_address.downcase
+      @error = "Signed-in Google account does not match the requested email"
+      return
+    end
 
+    bot_user = BotUser.begin_verification!(chat_id: @chat_id, authorized_user: @authorized_user)
     @code = bot_user.code
   end
 

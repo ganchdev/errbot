@@ -11,16 +11,16 @@ module Api
         code = params[:code]
         chat_id = params[:chat_id]
 
-        bot_user = BotUser.fetch_by_code_and_chat_id!(code, chat_id)
+        bot_user = BotUser.confirm_link!(code: code, chat_id: chat_id)
 
         if bot_user
-          user = bot_user.authorized_user
+          authorized_user = bot_user.authorized_user
 
           render json: {
             success: true,
             user: {
-              id: user.id,
-              email: user.email_address
+              id: authorized_user.id,
+              email: authorized_user.email_address
             },
             token: bot_user.api_token
           }
@@ -38,7 +38,7 @@ module Api
           return render json: { error: "Missing token" }, status: :unauthorized
         end
 
-        bot_user = BotUser.find_by(api_token: token)
+        bot_user = BotUser.linked.find_by(api_token: token)
 
         if bot_user.nil?
           return render json: { error: "Invalid token" }, status: :unauthorized

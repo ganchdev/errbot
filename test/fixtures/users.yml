@@ -14,17 +14,17 @@
 #  updated_at    :datetime         not null
 #
 one:
-  email_address: MyString
-  name: MyString
-  first_name: MyString
-  last_name: MyString
-  image: MyString
+  email_address: one@example.com
+  name: User One
+  first_name: User
+  last_name: One
+  image: https://example.com/one.png
   admin: false
 
 two:
-  email_address: MyString
-  name: MyString
-  first_name: MyString
-  last_name: MyString
-  image: MyString
+  email_address: two@example.com
+  name: User Two
+  first_name: User
+  last_name: Two
+  image: https://example.com/two.png
   admin: false

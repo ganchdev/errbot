@@ -12,12 +12,14 @@
 #  updated_at         :datetime         not null
 #  authorized_user_id :integer          not null
 #  chat_id            :string           not null
+#  linked_at          :datetime
 #
 # Indexes
 #
 #  index_bot_users_on_authorized_user_id  (authorized_user_id)
 #  index_bot_users_on_chat_id_and_code    (chat_id,code)
 #  index_bot_users_on_api_token           (api_token) UNIQUE
+#  index_bot_users_on_linked_at           (linked_at)
 #
 # Foreign Keys
 #
@@ -37,10 +39,9 @@ class BotUserTest < ActiveSupport::TestCase
     assert bot_user.code.length == 6
   end
 
-  test "generates api_token on creation" do
+  test "does not generate api_token on creation" do
     bot_user = BotUser.create!(authorized_user: @authorized_user, chat_id: "123456")
-    assert bot_user.api_token.present?
-    assert bot_user.api_token.length == 32
+    assert_nil bot_user.api_token
   end
 
   test "sets expires_at on creation" do
@@ -68,15 +69,41 @@ class BotUserTest < ActiveSupport::TestCase
     assert_nil found
   end
 
+  test "begin_verification refreshes code and resets linked_at" do
+    bot_user = BotUser.create!(
+      authorized_user: @authorized_user,
+      chat_id: "123456",
+      linked_at: Time.current,
+      api_token: "old_token"
+    )
+    old_code = bot_user.code
+
+    refreshed = BotUser.begin_verification!(chat_id: "123456", authorized_user: @authorized_user)
+
+    assert_equal bot_user.id, refreshed.id
+    assert_nil refreshed.linked_at
+    assert_not_equal old_code, refreshed.code
+  end
+
+  test "confirm_link marks bot_user as linked and issues a token" do
+    bot_user = BotUser.begin_verification!(chat_id: "123456", authorized_user: @authorized_user)
+
+    linked_bot_user = BotUser.confirm_link!(chat_id: "123456", code: bot_user.code)
+
+    assert linked_bot_user.linked?
+    assert linked_bot_user.api_token.present?
+  end
+
   test "find_by_token returns bot_user if valid" do
     bot_user = BotUser.create!(authorized_user: @authorized_user, chat_id: "123456")
-    found = BotUser.find_by(api_token: bot_user.api_token)
+    bot_user.complete_link!
+    found = BotUser.linked.find_by(api_token: bot_user.api_token)
     assert_equal bot_user.id, found.id
   end
 
   test "find_by_token returns nil if token not found" do
     BotUser.create!(authorized_user: @authorized_user, chat_id: "123456")
-    found = BotUser.find_by(api_token: "nonexistent_token")
+    found = BotUser.linked.find_by(api_token: "nonexistent_token")
     assert_nil found
   end
 
