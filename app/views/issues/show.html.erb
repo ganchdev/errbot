@@ -1,0 +1,89 @@
+<% content_for :title, @issue.title.presence || "Issue #{@issue.id}" %>
+
+<!-- Issue hero with identity and workflow actions -->
+<section class="flex flex-col gap-4 rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80 lg:flex-row lg:items-start lg:justify-between">
+  <!-- Issue header metadata -->
+  <div class="space-y-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF3300]">Issue <%= @issue.id %></p>
+      <%= render StatusBadge::Component.new(status: @issue.status) %>
+    </div>
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50"><%= @issue.title.presence || @issue.fingerprint_hash %></h1>
+    <p class="text-sm text-zinc-600 dark:text-zinc-400">
+      <%= @issue.project.name %> · <%= @issue.level.presence || "Unknown level" %> · <%= @issue.platform.presence || "Unknown platform" %>
+    </p>
+  </div>
+  <!-- Issue workflow action buttons -->
+  <div class="flex flex-wrap gap-3">
+    <% unless @issue.status == "resolved" %>
+      <%= button_to "Resolve", resolve_issue_path(@issue), method: :patch, class: "rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500" %>
+    <% end %>
+    <% unless @issue.status == "ignored" %>
+      <%= button_to "Ignore", ignore_issue_path(@issue), method: :patch, class: "rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-300" %>
+    <% end %>
+    <% unless @issue.status == "open" %>
+      <%= button_to "Re-open", reopen_issue_path(@issue), method: :patch, class: "rounded-full border border-[#FF3300] px-5 py-3 text-sm font-semibold text-[#FF3300] transition hover:bg-[#FF3300] hover:text-white" %>
+    <% end %>
+  </div>
+</section>
+
+<!-- Issue summary stat cards -->
+<section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+  <article class="rounded-3xl border border-zinc-200/70 bg-white/90 p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Project</p>
+    <p class="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50"><%= @issue.project.name %></p>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400"><%= @issue.project.slug %></p>
+  </article>
+  <article class="rounded-3xl border border-zinc-200/70 bg-white/90 p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Occurrences</p>
+    <p class="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50"><%= @issue.occurrences_count %></p>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Grouped by fingerprint</p>
+  </article>
+  <article class="rounded-3xl border border-zinc-200/70 bg-white/90 p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Environment</p>
+    <p class="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50"><%= @issue.last_environment.presence || "—" %></p>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Latest known environment</p>
+  </article>
+  <article class="rounded-3xl border border-zinc-200/70 bg-white/90 p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Release</p>
+    <p class="mt-3 text-lg font-semibold text-zinc-950 dark:text-zinc-50"><%= @issue.last_release.presence || "—" %></p>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Latest seen release</p>
+  </article>
+</section>
+
+<!-- Basic issue detail panels -->
+<section class="grid gap-4 lg:grid-cols-2">
+  <!-- Timeline panel -->
+  <article class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <h2 class="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Timeline</h2>
+    <dl class="mt-4 space-y-4 text-sm">
+      <div class="flex items-center justify-between gap-4 border-b border-zinc-200/70 pb-4 dark:border-zinc-800">
+        <dt class="text-zinc-500 dark:text-zinc-400">First seen</dt>
+        <dd class="font-medium text-zinc-900 dark:text-zinc-100"><%= @issue.first_seen_at&.strftime("%Y-%m-%d %H:%M:%S") || "—" %></dd>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <dt class="text-zinc-500 dark:text-zinc-400">Last seen</dt>
+        <dd class="font-medium text-zinc-900 dark:text-zinc-100"><%= @issue.last_seen_at&.strftime("%Y-%m-%d %H:%M:%S") || "—" %></dd>
+      </div>
+    </dl>
+  </article>
+
+  <!-- Static issue metadata panel -->
+  <article class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <h2 class="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Details</h2>
+    <dl class="mt-4 space-y-4 text-sm">
+      <div class="flex items-center justify-between gap-4 border-b border-zinc-200/70 pb-4 dark:border-zinc-800">
+        <dt class="text-zinc-500 dark:text-zinc-400">Fingerprint</dt>
+        <dd class="max-w-[16rem] truncate font-mono text-xs text-zinc-900 dark:text-zinc-100"><%= @issue.fingerprint_hash %></dd>
+      </div>
+      <div class="flex items-center justify-between gap-4 border-b border-zinc-200/70 pb-4 dark:border-zinc-800">
+        <dt class="text-zinc-500 dark:text-zinc-400">Status</dt>
+        <dd><%= render StatusBadge::Component.new(status: @issue.status) %></dd>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <dt class="text-zinc-500 dark:text-zinc-400">ID</dt>
+        <dd class="font-medium text-zinc-900 dark:text-zinc-100">#<%= @issue.id %></dd>
+      </div>
+    </dl>
+  </article>
+</section>

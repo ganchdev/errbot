@@ -1,5 +1,20 @@
-<h1>Sign in to Errbot</h1>
-<p>Use your Google account to sign in.</p>
-<%= form_tag "/auth/google_oauth2", data: { turbo: false } do %>
-  <%= submit_tag "Sign in with Google" %>
-<% end %>
+<% content_for :title, "Sign in to Errbot" %>
+
+<!-- Authentication hero / sign-in card -->
+<section class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-8 shadow-xl shadow-zinc-950/5 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85 dark:shadow-black/30">
+  <!-- Intro copy -->
+  <div class="space-y-4">
+    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF3300]">Self-hosted exception tracking</p>
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Sign in to Errbot</h1>
+    <p class="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+      Use your Google account to open the dashboard, review issues, and manage alerts across your projects.
+    </p>
+  </div>
+
+  <!-- OAuth action panel -->
+  <div class="mt-8 rounded-3xl border border-zinc-200/70 bg-zinc-50/80 p-5 dark:border-zinc-800 dark:bg-zinc-950/70">
+    <%= form_tag "/auth/google_oauth2", data: { turbo: false } do %>
+      <%= submit_tag "Continue with Google", class: "w-full rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00] focus:outline-none focus:ring-2 focus:ring-[#FF3300] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900" %>
+    <% end %>
+  </div>
+</section>

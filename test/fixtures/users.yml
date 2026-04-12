@@ -28,3 +28,11 @@ two:
   last_name: Two
   image: https://example.com/two.png
   admin: false
+
+admin:
+  email_address: admin@example.com
+  name: Admin User
+  first_name: Admin
+  last_name: User
+  image: https://example.com/admin.png
+  admin: true

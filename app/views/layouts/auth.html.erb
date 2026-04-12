@@ -1,20 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="h-full">
   <head>
-    <title><%= yield(:title).presence || "Auth" %></title>
+    <title><%= yield(:title).presence || "Errbot Sign In" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body>
-    <% if notice %>
-      <p><%= notice %></p>
-    <% end %>
-    <% if alert %>
-      <p><%= alert %></p>
-    <% end %>
-    <%= yield %>
+  <body class="min-h-full bg-zinc-100 text-zinc-950 antialiased dark:bg-zinc-950 dark:text-zinc-50">
+    <!-- Auth-only layout with centered content column -->
+    <main class="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,51,0,0.18),_transparent_28%),linear-gradient(to_bottom,_rgba(255,255,255,0.98),_rgba(244,244,245,0.96))] px-6 py-12 dark:bg-[radial-gradient(circle_at_top,_rgba(255,80,32,0.18),_transparent_24%),linear-gradient(to_bottom,_rgba(24,24,27,0.98),_rgba(9,9,11,0.98))]">
+      <!-- Auth card stack -->
+      <div class="w-full max-w-md space-y-6">
+        <!-- Flash messages for auth errors / notices -->
+        <% flash.each do |type, message| %>
+          <%= render FlashMessage::Component.new(type: type, message: message) %>
+        <% end %>
+        <!-- Route-specific auth content -->
+        <%= yield %>
+      </div>
+    </main>
   </body>
 </html>

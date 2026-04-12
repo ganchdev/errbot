@@ -1,0 +1,66 @@
+<% content_for :title, "Projects" %>
+
+<!-- Two-column admin page: project list on the left, create form on the right -->
+<section class="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+  <div class="space-y-6">
+    <!-- Page intro -->
+    <div class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+      <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF3300]">Admin</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Projects</h1>
+      <p class="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+        Manage the applications that can ingest events into Errbot. Tokens remain visible here as read-only configuration values.
+      </p>
+    </div>
+
+    <% if @projects.empty? %>
+      <!-- Empty projects state -->
+      <%= render EmptyState::Component.new(title: "No projects yet", message: "Create the first project to generate an ingest token and start sending exception events.") %>
+    <% else %>
+      <!-- Projects table -->
+      <section class="overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-white/90 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <thead class="bg-zinc-50/80 dark:bg-zinc-950/70">
+              <tr class="text-left text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+                <th class="px-6 py-4">Project</th>
+                <th class="px-6 py-4">Default env</th>
+                <th class="px-6 py-4">Token</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <!-- One row per project -->
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <% @projects.each do |project| %>
+                <tr>
+                  <td class="px-6 py-5">
+                    <p class="font-medium text-zinc-950 dark:text-zinc-50"><%= project.name %></p>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400"><%= project.slug %></p>
+                  </td>
+                  <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300"><%= project.default_environment.presence || "—" %></td>
+                  <td class="px-6 py-5">
+                    <p class="max-w-xs truncate font-mono text-xs text-zinc-700 dark:text-zinc-300"><%= project.ingest_token %></p>
+                  </td>
+                  <td class="px-6 py-5">
+                    <div class="flex flex-wrap gap-3 text-sm">
+                      <%= link_to "Edit", edit_project_path(project), class: "font-medium text-[#FF3300] hover:text-[#e02d00]" %>
+                      <%= button_to "Delete", project_path(project), method: :delete, class: "font-medium text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400" %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% end %>
+  </div>
+
+  <!-- Inline create form panel -->
+  <section class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <h2 class="text-xl font-semibold text-zinc-950 dark:text-zinc-50">New project</h2>
+    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Create a project and Errbot will generate its ingest token automatically.</p>
+    <div class="mt-6">
+      <%= render "form", project: @project, submit_label: "Create project" %>
+    </div>
+  </section>
+</section>

@@ -1,0 +1,17 @@
+<%= form_with model: authorized_user, class: "space-y-4" do |form| %>
+  <% if authorized_user.errors.any? %>
+    <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-900 dark:text-red-100">
+      <%= authorized_user.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <label class="block space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+    <span>Email address</span>
+    <%= form.email_field :email_address, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100", placeholder: "team@example.com" %>
+  </label>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <%= form.submit submit_label, class: "rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" %>
+    <%= link_to "Cancel", authorized_users_path, class: "rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-100 dark:hover:text-zinc-50" %>
+  </div>
+<% end %>

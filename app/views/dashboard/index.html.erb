@@ -1,2 +1,99 @@
-<h1>Welcome to Errbot</h1>
-<p>Your personal exception tracker.</p>
+<% content_for :title, "Issues" %>
+
+<!-- Dashboard hero with page intro and status summary cards -->
+<section class="flex flex-col gap-3 rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80 lg:flex-row lg:items-end lg:justify-between">
+  <!-- Dashboard title and supporting copy -->
+  <div class="space-y-2">
+    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF3300]">Errboard</p>
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">All issues</h1>
+    <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+      Browse grouped exceptions across every project, filter by the latest known environment, and update issue status as incidents move through triage.
+    </p>
+  </div>
+  <!-- Aggregate status / project metrics -->
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="rounded-2xl border border-zinc-200/70 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Open</p>
+      <p class="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50"><%= @issues.count { |issue| issue.status == "open" } %></p>
+    </div>
+    <div class="rounded-2xl border border-zinc-200/70 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Resolved</p>
+      <p class="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50"><%= @issues.count { |issue| issue.status == "resolved" } %></p>
+    </div>
+    <div class="rounded-2xl border border-zinc-200/70 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Ignored</p>
+      <p class="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50"><%= @issues.count { |issue| issue.status == "ignored" } %></p>
+    </div>
+    <div class="rounded-2xl border border-zinc-200/70 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Projects</p>
+      <p class="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50"><%= @projects.size %></p>
+    </div>
+  </div>
+</section>
+
+<!-- Dashboard filter controls -->
+<section class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+  <%= form_with url: root_path, method: :get, class: "grid gap-4 md:grid-cols-4" do |form| %>
+    <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+      <span>Project</span>
+      <%= form.select :project_id, options_for_select([["All projects", ""]] + @projects.map { |project| [project.name, project.id] }, params[:project_id]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+    </label>
+    <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+      <span>Status</span>
+      <%= form.select :status, options_for_select([["All statuses", ""]] + Issue::STATUSES.map { |status| [status.capitalize, status] }, params[:status]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+    </label>
+    <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+      <span>Environment</span>
+      <%= form.select :environment, options_for_select([["All environments", ""]] + @environments.map { |environment| [environment, environment] }, params[:environment]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+    </label>
+    <div class="flex items-end gap-3">
+      <%= form.submit "Apply filters", class: "rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" %>
+      <%= link_to "Reset", root_path, class: "rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-100 dark:hover:text-zinc-50" %>
+    </div>
+  <% end %>
+</section>
+
+<% if @issues.empty? %>
+  <!-- Empty dashboard state -->
+  <%= render EmptyState::Component.new(title: "No issues match these filters", message: "Try clearing one of the filters or wait for a new exception event to arrive.") %>
+<% else %>
+  <!-- Issues results table -->
+  <section class="overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-white/90 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+        <thead class="bg-zinc-50/80 dark:bg-zinc-950/70">
+          <tr class="text-left text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+            <th class="px-6 py-4">Issue</th>
+            <th class="px-6 py-4">Project</th>
+            <th class="px-6 py-4">Environment</th>
+            <th class="px-6 py-4">Seen</th>
+            <th class="px-6 py-4">Occurrences</th>
+            <th class="px-6 py-4">Status</th>
+          </tr>
+        </thead>
+        <!-- One row per grouped issue -->
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @issues.each do |issue| %>
+            <tr class="align-top">
+              <td class="px-6 py-5">
+                <!-- Issue primary link / summary -->
+                <%= link_to issue_path(issue), class: "block space-y-2" do %>
+                  <p class="font-semibold text-zinc-950 transition hover:text-[#FF3300] dark:text-zinc-50"><%= issue.title.presence || issue.fingerprint_hash %></p>
+                  <p class="text-sm text-zinc-500 dark:text-zinc-400"><%= issue.level.presence || "Unknown level" %> · <%= issue.platform.presence || "Unknown platform" %></p>
+                <% end %>
+              </td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300"><%= issue.project.name %></td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300"><%= issue.last_environment.presence || "—" %></td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300">
+                <p>Last: <%= issue.last_seen_at&.strftime("%Y-%m-%d %H:%M") || "—" %></p>
+                <p class="mt-1 text-zinc-500 dark:text-zinc-400">First: <%= issue.first_seen_at&.strftime("%Y-%m-%d %H:%M") || "—" %></p>
+              </td>
+              <td class="px-6 py-5 text-sm font-medium text-zinc-700 dark:text-zinc-300"><%= issue.occurrences_count %></td>
+              <td class="px-6 py-5"><%= render StatusBadge::Component.new(status: issue.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% end %>

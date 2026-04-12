@@ -37,33 +37,33 @@
 one:
   project: one
   issue: one
-  event_uuid: MyString
+  event_uuid: event-one
   occurred_at: 2026-04-06 00:21:23
-  environment: MyString
-  release: MyString
-  server_name: MyString
-  transaction_name: MyString
-  exception_type: MyString
-  exception_message: MyString
+  environment: production
+  release: 2026.04.06.1
+  server_name: app-01
+  transaction_name: checkout
+  exception_type: NoMethodError
+  exception_message: undefined method `id' for nil
   handled: false
-  level: MyString
-  raw_json: MyText
-  notification_state: MyString
+  level: error
+  raw_json: "{}"
+  notification_state: sent
   notified_at: 2026-04-06 00:21:23
 
 two:
   project: two
   issue: two
-  event_uuid: MyString
+  event_uuid: event-two
   occurred_at: 2026-04-06 00:21:23
-  environment: MyString
-  release: MyString
-  server_name: MyString
-  transaction_name: MyString
-  exception_type: MyString
-  exception_message: MyString
+  environment: staging
+  release: 2026.04.07.2
+  server_name: worker-01
+  transaction_name: sync
+  exception_type: TimeoutError
+  exception_message: execution expired
   handled: false
-  level: MyString
-  raw_json: MyText
-  notification_state: MyString
+  level: error
+  raw_json: "{}"
+  notification_state: skipped
   notified_at: 2026-04-06 00:21:23

@@ -17,13 +17,13 @@
 #  index_projects_on_slug          (slug) UNIQUE
 #
 one:
-  name: MyString
-  slug: one
-  ingest_token: one
-  default_environment: MyString
+  name: Storefront API
+  slug: storefront-api
+  ingest_token: token-one
+  default_environment: production
 
 two:
-  name: MyString
-  slug: two
-  ingest_token: two
-  default_environment: MyString
+  name: Worker Service
+  slug: worker-service
+  ingest_token: token-two
+  default_environment: staging

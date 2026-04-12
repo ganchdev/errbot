@@ -53,10 +53,41 @@ A minimal self-hosted exception tracker using Sentry SDKs → custom backend →
 
 ### Phase 3 — Web UI
 
-- [ ] Build Issues index page (`/issues`)
-- [ ] Build Issue detail page (`/issues/:id`)
-- [ ] Add filters: project, status, environment
-- [ ] Add actions: resolve, ignore, re-open
+#### Design
+
+- Need Light and Dark mode
+- Accent color: something like #FF3300
+- Background color: Light mode - white, Dark mode -gray
+- Font: System
+- Rounded borders
+
+#### Implementation
+
+- Use TailsindCSS
+- Use ViewComponents
+- Avoid using Rails view application helpers
+
+#### Decisions
+
+- Dashboard (`/`) is the main issues list page
+- Issue pages are available to all signed-in authorized users
+- Admin-only pages: Authorized Users CRUD and Projects CRUD
+- Style the auth sign-in page (`/auth`)
+- Style the bot verification page (`/bot/verify`)
+- Keep Issue detail page (`/issues/:id`) basic for now: show title, status, project, occurrences, timestamps, environment/release, and issue actions
+- Environment filter uses `issues.last_environment`
+- Projects admin manages basic fields only: `name`, `slug`, `default_environment`; show `ingest_token` as read-only, with no rotation in Phase 3
+
+#### Tasks
+
+- [x] Style the auth sign-in page (`/auth/new`)
+- [x] Style the bot verification page (`/bot/verify`)
+- [x] Build Authorized Users CRUD pages for admin users only
+- [x] Build Projects CRUD pages for admin users only
+- [x] Build Dashboard index page which lists all issues (similar to what Issues index page `/issues` would look like)
+- [x] Build Issue detail page (`/issues/:id`)
+- [x] Add filters: project, status, environment
+- [x] Add actions: resolve, ignore, re-open
 
 ### Phase 4 — Hardening
 

@@ -25,3 +25,7 @@ one:
 two:
   email_address: two@example.com
   user: two
+
+admin:
+  email_address: admin@example.com
+  user: admin

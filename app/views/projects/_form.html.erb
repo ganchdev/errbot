@@ -1,0 +1,34 @@
+<%= form_with model: project, class: "space-y-4" do |form| %>
+  <% if project.errors.any? %>
+    <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-900 dark:text-red-100">
+      <%= project.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <label class="block space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+    <span>Name</span>
+    <%= form.text_field :name, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100", placeholder: "Payments API" %>
+  </label>
+
+  <label class="block space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+    <span>Slug</span>
+    <%= form.text_field :slug, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100", placeholder: "payments-api" %>
+  </label>
+
+  <label class="block space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+    <span>Default environment</span>
+    <%= form.text_field :default_environment, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100", placeholder: "production" %>
+  </label>
+
+  <% if project.persisted? %>
+    <div class="rounded-2xl border border-zinc-200/70 bg-zinc-50/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950/70">
+      <p class="text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Ingest token</p>
+      <p class="mt-2 break-all font-mono text-sm text-zinc-900 dark:text-zinc-100"><%= project.ingest_token %></p>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <%= form.submit submit_label, class: "rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" %>
+    <%= link_to "Cancel", projects_path, class: "rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-100 dark:hover:text-zinc-50" %>
+  </div>
+<% end %>

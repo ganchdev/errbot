@@ -21,7 +21,15 @@ Rails.application.routes.draw do
   get "/auth/failure", to: redirect("/auth")
 
   get "bot/verify", to: "bot_verify#show", as: :bot_verify
-  resources :authorized_users, only: [:index]
+  resources :authorized_users, except: [:show]
+  resources :projects, except: [:show]
+  resources :issues, only: [:show] do
+    member do
+      patch :resolve
+      patch :ignore
+      patch :reopen
+    end
+  end
 
   root to: "dashboard#index"
 end

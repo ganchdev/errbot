@@ -33,14 +33,28 @@
 #
 class Issue < ApplicationRecord
 
+  STATUSES = %w[open resolved ignored].freeze
+
   belongs_to :project
   has_many :events, dependent: :destroy
 
   validates :fingerprint_hash, presence: true
-  validates :status, presence: true, inclusion: { in: %w[open resolved ignored] }
+  validates :status, presence: true, inclusion: { in: STATUSES }
 
   scope :open, -> { where(status: "open") }
   scope :resolved, -> { where(status: "resolved") }
   scope :ignored, -> { where(status: "ignored") }
+
+  def resolve!
+    update!(status: "resolved")
+  end
+
+  def ignore!
+    update!(status: "ignored")
+  end
+
+  def reopen!
+    update!(status: "open")
+  end
 
 end

@@ -1,23 +1,61 @@
-<h1>User Authorizations</h1>
-<% if @authorized_users.empty? %>
-  <p>No authorized users yet.</p>
-<% else %>
-  <table>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>User</th>
-        <th>Created</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @authorized_users.each do |au| %>
-        <tr>
-          <td><%= au.email_address %></td>
-          <td><%= au.user ? au.user.name : "Not linked" %></td>
-          <td><%= au.created_at.strftime("%Y-%m-%d") %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
+<% content_for :title, "Authorized Users" %>
+
+<!-- Two-column admin page: list on the left, create form on the right -->
+<section class="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+  <div class="space-y-6">
+    <!-- Page intro -->
+    <div class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+      <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF3300]">Admin</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Authorized users</h1>
+      <p class="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+        Control which email addresses can sign in to Errbot. Removing an entry stops future access without deleting the underlying user record.
+      </p>
+    </div>
+
+    <% if @authorized_users.empty? %>
+      <!-- Empty authorized users state -->
+      <%= render EmptyState::Component.new(title: "No authorized users yet", message: "Add the first email address to unlock access to the app.") %>
+    <% else %>
+      <!-- Authorized users table -->
+      <section class="overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-white/90 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <thead class="bg-zinc-50/80 dark:bg-zinc-950/70">
+              <tr class="text-left text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+                <th class="px-6 py-4">Email</th>
+                <th class="px-6 py-4">Linked user</th>
+                <th class="px-6 py-4">Role</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <!-- One row per authorized email -->
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <% @authorized_users.each do |authorized_user| %>
+                <tr>
+                  <td class="px-6 py-5 font-medium text-zinc-950 dark:text-zinc-50"><%= authorized_user.email_address %></td>
+                  <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300"><%= authorized_user.user&.name || "Not linked yet" %></td>
+                  <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300"><%= authorized_user.user&.admin? ? "Admin" : "Authorized user" %></td>
+                  <td class="px-6 py-5">
+                    <div class="flex flex-wrap gap-3 text-sm">
+                      <%= link_to "Edit", edit_authorized_user_path(authorized_user), class: "font-medium text-[#FF3300] hover:text-[#e02d00]" %>
+                      <%= button_to "Remove", authorized_user_path(authorized_user), method: :delete, class: "font-medium text-zinc-500 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400" %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% end %>
+  </div>
+
+  <!-- Inline create form panel -->
+  <section class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <h2 class="text-xl font-semibold text-zinc-950 dark:text-zinc-50">Add authorized user</h2>
+    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Grant a new email address access to Google sign-in.</p>
+    <div class="mt-6">
+      <%= render "form", authorized_user: @authorized_user, submit_label: "Add user" %>
+    </div>
+  </section>
+</section>
