@@ -1,0 +1,11 @@
+<%= content_tag :div, data: { controller: "copy-to-clipboard", copy_to_clipboard_copied_label_value: copied_label }, **html_options do %>
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div class="min-w-0 flex-1 rounded-2xl bg-zinc-950 px-6 py-5 text-center dark:bg-zinc-100">
+      <code class="text-4xl font-semibold tracking-[0.5em] text-white dark:text-zinc-950" data-copy-to-clipboard-target="source"><%= content %></code>
+    </div>
+    <button type="button" class="rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" data-copy-to-clipboard-target="button" data-action="copy-to-clipboard#copy">
+      <%= label %>
+    </button>
+  </div>
+  <p class="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300" data-copy-to-clipboard-target="status" aria-live="polite"></p>
+<% end %>

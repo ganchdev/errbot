@@ -28,6 +28,7 @@ module Errbot
     # config.eager_load_paths << Rails.root.join("extras")
     config.autoload_paths << Rails.root.join("app/components")
     config.eager_load_paths << Rails.root.join("app/components")
+    config.importmap.cache_sweepers << Rails.root.join("app/components")
 
   end
 end
