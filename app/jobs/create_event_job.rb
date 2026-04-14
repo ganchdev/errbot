@@ -49,6 +49,7 @@ class CreateEventJob < ApplicationJob
   def find_or_create_issue(project, normalized_event, fingerprint_hash)
     issue = Issue.create_or_find_by!(project: project, fingerprint_hash: fingerprint_hash) do |issue|
       issue.title = normalized_event.title
+      issue.culprit = normalized_event.culprit
       issue.platform = normalized_event.platform
       issue.level = normalized_event.level
       issue.first_seen_at = normalized_event.occurred_at
@@ -118,6 +119,7 @@ class CreateEventJob < ApplicationJob
     issue.update!(
       occurrences_count: issue.events.count,
       title: normalized_event.title.presence || issue.title,
+      culprit: normalized_event.culprit.presence || issue.culprit,
       level: normalized_event.level.presence || issue.level,
       platform: normalized_event.platform.presence || issue.platform,
       last_seen_at: event.occurred_at,

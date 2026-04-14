@@ -53,4 +53,29 @@ class Event < ApplicationRecord
 
   scope :pending_notification, -> { where(notification_state: "pending") }
 
+  def parsed_payload
+    @parsed_payload ||= JSON.parse(raw_json.presence || "{}")
+  rescue JSON::ParserError
+    Ingestion::EnvelopeParser.call(raw_json.presence || "")
+  rescue Ingestion::InvalidPayloadError
+    {}
+  end
+
+  def stack_frames
+    exception = parsed_payload.dig("exception", "values")&.last || parsed_payload["exception"] || {}
+    Array(exception.dig("stacktrace", "frames")).grep(Hash)
+  end
+
+  def exception_summary
+    exception_message.to_s.lines.first.to_s.strip.presence || exception_type
+  end
+
+  def exception_details
+    exception_message.to_s.lines.drop(1).join.rstrip.presence
+  end
+
+  def preferred_stack_frames
+    stack_frames.reverse
+  end
+
 end

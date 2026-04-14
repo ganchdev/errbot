@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :projects, except: [:show]
   resources :issues, only: [:show] do
     member do
+      get :event_json
       patch :resolve
       patch :ignore
       patch :reopen

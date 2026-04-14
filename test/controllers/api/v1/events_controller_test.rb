@@ -43,7 +43,8 @@ module Api
         assert json["event_id"]
 
         issue = Issue.find(json["issue_id"])
-        assert_equal "NoMethodError: undefined method `id' for nil:NilClass", issue.title
+        assert_equal "NoMethodError", issue.title
+        assert_equal "app/services/payments.rb in call", issue.culprit
         assert_equal 1, issue.occurrences_count
         assert_equal "open", issue.status
       end
@@ -217,6 +218,7 @@ module Api
         assert_equal "sentry-envelope-001", event.event_uuid
         assert_equal "RuntimeError", event.exception_type
         assert_equal "envelope error", event.exception_message
+        assert_equal "app/jobs/example_job.rb", event.stack_frames.first["filename"]
       end
 
       test "fingerprint includes in_app frame" do

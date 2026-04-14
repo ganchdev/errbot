@@ -54,7 +54,8 @@ class CreateEventJobTest < ActiveJob::TestCase
     assert_equal "pending", event.notification_state
     assert_equal "new_issue", event.notification_reason
     assert_equal 1, issue.occurrences_count
-    assert_equal "RuntimeError: test error", issue.title
+    assert_equal "RuntimeError", issue.title
+    assert_equal "app.rb in main", issue.culprit
     assert_equal "open", issue.status
   end
 

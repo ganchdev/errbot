@@ -1,0 +1,25 @@
+<%= content_tag :div,
+                class: "inline-flex items-center gap-1 rounded-full border border-zinc-200/70 bg-zinc-100/90 p-1 dark:border-zinc-700 dark:bg-zinc-800/80",
+                data: { controller: "issue-view-toggle", issue_view_toggle_default_view_value: default_view },
+                **html_options do %>
+  <button
+    type="button"
+    class="cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition"
+    data-issue-view-toggle-target="button"
+    data-view="<%= left_view %>"
+    data-action="issue-view-toggle#show"
+    aria-pressed="true"
+  >
+    <%= left_label %>
+  </button>
+  <button
+    type="button"
+    class="cursor-pointer rounded-full px-4 py-2 text-sm font-semibold transition"
+    data-issue-view-toggle-target="button"
+    data-view="<%= right_view %>"
+    data-action="issue-view-toggle#show"
+    aria-pressed="false"
+  >
+    <%= right_label %>
+  </button>
+<% end %>

@@ -9,6 +9,12 @@
       <%= render StatusBadge::Component.new(status: @issue.status) %>
     </div>
     <h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50"><%= @issue.title.presence || @issue.fingerprint_hash %></h1>
+    <% if @issue.culprit.present? %>
+      <p class="font-mono text-sm text-zinc-700 dark:text-zinc-300"><%= @issue.culprit %></p>
+    <% end %>
+    <% if @latest_event.present? %>
+      <p class="text-sm text-zinc-600 dark:text-zinc-400"><%= @latest_event.exception_summary %></p>
+    <% end %>
     <p class="text-sm text-zinc-600 dark:text-zinc-400">
       <%= @issue.project.name %> · <%= @issue.level.presence || "Unknown level" %> · <%= @issue.platform.presence || "Unknown platform" %>
     </p>
@@ -16,13 +22,13 @@
   <!-- Issue workflow action buttons -->
   <div class="flex flex-wrap gap-3">
     <% unless @issue.status == "resolved" %>
-      <%= button_to "Resolve", resolve_issue_path(@issue), method: :patch, class: "rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500" %>
+      <%= button_to "Resolve", resolve_issue_path(@issue), method: :patch, class: "cursor-pointer rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500" %>
     <% end %>
     <% unless @issue.status == "ignored" %>
-      <%= button_to "Ignore", ignore_issue_path(@issue), method: :patch, class: "rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-300" %>
+      <%= button_to "Ignore", ignore_issue_path(@issue), method: :patch, class: "cursor-pointer rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-300" %>
     <% end %>
     <% unless @issue.status == "open" %>
-      <%= button_to "Re-open", reopen_issue_path(@issue), method: :patch, class: "rounded-full border border-[#FF3300] px-5 py-3 text-sm font-semibold text-[#FF3300] transition hover:bg-[#FF3300] hover:text-white" %>
+      <%= button_to "Re-open", reopen_issue_path(@issue), method: :patch, class: "cursor-pointer rounded-full border border-[#FF3300] px-5 py-3 text-sm font-semibold text-[#FF3300] transition hover:bg-[#FF3300] hover:text-white" %>
     <% end %>
   </div>
 </section>
@@ -85,5 +91,49 @@
         <dd class="font-medium text-zinc-900 dark:text-zinc-100">#<%= @issue.id %></dd>
       </div>
     </dl>
+  </article>
+</section>
+
+<section>
+  <article class="rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80" data-issue-view-container>
+    <% if @latest_event.present? %>
+      <div class="flex items-start justify-between gap-4">
+        <%= render IssueViewToggle::Component.new(left_label: "Stacktrace", right_label: "Frames", right_view: "frames", default_view: "stacktrace") %>
+        <%= link_to "Event JSON",
+                    event_json_issue_path(@issue),
+                    target: "_blank",
+                    rel: "noopener",
+                    class: "rounded-full border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-100 dark:hover:text-zinc-50" %>
+      </div>
+
+      <div class="mt-5" data-issue-view-panel="stacktrace">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+          From the most recent event at <%= @latest_event.occurred_at&.strftime("%Y-%m-%d %H:%M:%S") || "unknown time" %>
+        </p>
+
+        <div class="mt-5 overflow-x-auto rounded-2xl bg-zinc-950 p-5 text-zinc-100">
+          <p class="font-mono text-sm font-semibold"><%= @latest_event.exception_type %>: <%= @latest_event.exception_summary %></p>
+          <% if @latest_event.exception_details.present? %>
+            <pre class="mt-3 overflow-x-auto whitespace-pre font-mono text-xs leading-6 text-zinc-300"><%= @latest_event.exception_details %></pre>
+          <% end %>
+
+          <% if @stack_frames.any? %>
+            <div class="mt-4 overflow-x-auto whitespace-nowrap font-mono text-xs leading-6">
+              <% @stack_frames.each do |frame| %>
+                <p>from <%= frame["abs_path"].presence || frame["filename"].presence || "unknown file" %><% if frame["lineno"].present? %>:<%= frame["lineno"] %><% end %><% if frame["function"].present? %>:in <%= frame["function"] %><% end %></p>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="mt-4 text-sm text-zinc-400">The latest event was stored without stack frames.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="mt-5" data-issue-view-panel="frames" hidden>
+        <%= render IssueFrames::Component.new(frames: @stack_frames) %>
+      </div>
+    <% else %>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">No event data is available for this issue yet.</p>
+    <% end %>
   </article>
 </section>

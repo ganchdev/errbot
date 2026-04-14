@@ -50,7 +50,7 @@ module Api
         result = CreateEventJob.perform_now(
           project_id: @project.id,
           event_payload: event_payload,
-          raw_json: raw_body
+          raw_json: event_payload.to_json
         )
 
         render json: {

@@ -5,7 +5,7 @@ module Ingestion
   class EventNormalizer
 
     attr_reader :event_uuid, :occurred_at, :platform, :level, :environment, :release, :server_name, :transaction_name,
-                :exception_type, :exception_message, :handled, :tags, :frames, :raw_payload, :raw_json, :title
+                :exception_type, :exception_message, :handled, :tags, :frames, :raw_payload, :raw_json, :title, :culprit
 
     # Normalizes an incoming exception payload into the internal event shape.
     #
@@ -82,7 +82,8 @@ module Ingestion
       @frames = Array(exception.dig("stacktrace", "frames")).filter_map do |frame|
         frame.to_h.deep_stringify_keys if frame.respond_to?(:to_h)
       end
-      @title = [exception_type, exception_message].compact_blank.join(": ")
+      @culprit = build_culprit
+      @title = exception_type
     end
 
     # Pulls the exception object from either custom or Sentry-style payloads.
@@ -111,6 +112,16 @@ module Ingestion
       end
     rescue TypeError
       {}
+    end
+
+    def build_culprit
+      frame = frames.reverse.find do |candidate|
+        ActiveModel::Type::Boolean.new.cast(candidate["in_app"])
+      end || frames.last
+
+      return if frame.blank?
+
+      [frame["filename"].presence, frame["function"].presence].compact.join(" in ").presence
     end
 
   end

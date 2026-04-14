@@ -14,7 +14,8 @@ module Ingestion
       assert_equal false, event.handled
       assert_equal "POST /payments", event.transaction_name
       assert_equal({ "runtime" => "ruby-3.3.0" }, event.tags)
-      assert_equal "NoMethodError: undefined method id", event.title
+      assert_equal "NoMethodError", event.title
+      assert_equal "app/services/payments.rb in call", event.culprit
     end
 
     test "normalizes sentry exception values and tag pairs" do

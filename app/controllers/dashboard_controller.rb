@@ -4,7 +4,9 @@ class DashboardController < ApplicationController
 
   def index
     @projects = Project.order(:name)
-    @environments = Issue.where.not(last_environment: [nil, ""]).distinct.order(:last_environment).pluck(:last_environment)
+    @environments = Issue.where.not(
+      last_environment: [nil, ""]
+    ).distinct.order(:last_environment).pluck(:last_environment)
     @issues = filtered_issues
   end
 

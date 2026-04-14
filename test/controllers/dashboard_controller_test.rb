@@ -13,6 +13,8 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_match "All issues", response.body
     assert_match issues(:one).title, response.body
     assert_match issues(:two).title, response.body
+    assert_match "cursor-pointer rounded-full bg-[#FF3300]", response.body
+    assert_match "cursor-pointer w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3", response.body
   end
 
   test "dashboard filters issues by environment" do

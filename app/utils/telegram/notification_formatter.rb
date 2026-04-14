@@ -25,7 +25,8 @@ module Telegram
     def call
       [
         "<b>#{escaped_text(reason_label)} in #{escaped_text(event.project.name)}</b>",
-        "<pre>#{escaped_text(issue_summary)}</pre>",
+        (formatted_culprit if culprit.present?),
+        "<pre>#{escaped_text(error_summary)}</pre>",
         (formatted_field("Environment", event.environment) if event.environment.present?),
         (formatted_field("Release", event.release) if event.release.present?),
         formatted_field("Occurred", formatted_occurred_at)
@@ -49,13 +50,27 @@ module Telegram
     end
 
     # @return [String]
-    def issue_summary
-      event.issue.title.presence || error_summary
-    end
-
-    # @return [String]
     def error_summary
       [event.exception_type, event.exception_message].compact_blank.join(": ").presence || "Unknown error"
+    end
+
+    def culprit
+      culprit_from_frame || event.issue.culprit.presence
+    end
+
+    def culprit_from_frame
+      event.stack_frames.last&.slice("abs_path", "filename", "function", "lineno")&.then do |frame|
+        path = frame["abs_path"].presence || frame["filename"].presence
+        next if path.blank?
+
+        location = path.dup
+        location = "#{location}:#{frame['lineno']}" if frame["lineno"].present?
+        frame["function"].present? ? "#{location}:in #{frame['function']}" : location
+      end
+    end
+
+    def formatted_culprit
+      escaped_text(culprit)
     end
 
     # @return [String]

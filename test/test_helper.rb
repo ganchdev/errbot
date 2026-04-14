@@ -29,6 +29,10 @@ module AuthenticationTestHelper
 
 end
 
-class ActionDispatch::IntegrationTest
-  include AuthenticationTestHelper
+module ActionDispatch
+  class IntegrationTest
+
+    include AuthenticationTestHelper
+
+  end
 end

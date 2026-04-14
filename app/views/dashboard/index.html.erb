@@ -36,18 +36,18 @@
   <%= form_with url: root_path, method: :get, class: "grid gap-4 md:grid-cols-4" do |form| %>
     <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
       <span>Project</span>
-      <%= form.select :project_id, options_for_select([["All projects", ""]] + @projects.map { |project| [project.name, project.id] }, params[:project_id]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+      <%= form.select :project_id, options_for_select([["All projects", ""]] + @projects.map { |project| [project.name, project.id] }, params[:project_id]), {}, class: "cursor-pointer w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
     </label>
     <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
       <span>Status</span>
-      <%= form.select :status, options_for_select([["All statuses", ""]] + Issue::STATUSES.map { |status| [status.capitalize, status] }, params[:status]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+      <%= form.select :status, options_for_select([["All statuses", ""]] + Issue::STATUSES.map { |status| [status.capitalize, status] }, params[:status]), {}, class: "cursor-pointer w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
     </label>
     <label class="space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
       <span>Environment</span>
-      <%= form.select :environment, options_for_select([["All environments", ""]] + @environments.map { |environment| [environment, environment] }, params[:environment]), {}, class: "w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
+      <%= form.select :environment, options_for_select([["All environments", ""]] + @environments.map { |environment| [environment, environment] }, params[:environment]), {}, class: "cursor-pointer w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-[#FF3300] dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100" %>
     </label>
     <div class="flex items-end gap-3">
-      <%= form.submit "Apply filters", class: "rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" %>
+      <%= form.submit "Apply filters", class: "cursor-pointer rounded-full bg-[#FF3300] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e02d00]" %>
       <%= link_to "Reset", root_path, class: "rounded-full border border-zinc-300 px-5 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-100 dark:hover:text-zinc-50" %>
     </div>
   <% end %>

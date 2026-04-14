@@ -27,7 +27,8 @@ class AuthorizedUsersControllerTest < ActionDispatch::IntegrationTest
   test "admin can update authorized user" do
     sign_in_as(users(:admin))
 
-    patch authorized_user_path(authorized_users(:one)), params: { authorized_user: { email_address: "updated@example.com" } }
+    patch authorized_user_path(authorized_users(:one)),
+          params: { authorized_user: { email_address: "updated@example.com" } }
 
     assert_redirected_to authorized_users_path
     assert_equal "updated@example.com", authorized_users(:one).reload.email_address

@@ -47,7 +47,7 @@ one:
   exception_message: undefined method `id' for nil
   handled: false
   level: error
-  raw_json: "{}"
+  raw_json: '{"event_id":"event-one","exception":{"type":"NoMethodError","value":"undefined method `id` for nil","stacktrace":{"frames":[{"filename":"vendor/bundle/ruby/gems/actionpack.rb","function":"dispatch","lineno":12,"in_app":false,"pre_context":["      middleware.call(env)\n","    rescue => e\n"],"context_line":"      raise ActionDispatchError, e.message\n","post_context":["    end\n","  end\n"]},{"filename":"app/services/checkout.rb","function":"call","lineno":42,"in_app":true,"pre_context":["    cart = Cart.find(cart_id)\n","    order = cart.order\n"],"context_line":"    order.user.id\n","post_context":["  rescue StandardError => e\n","    ErrorReporter.notify(e)\n"]}]}}}'
   notification_state: sent
   notified_at: 2026-04-06 00:21:23
 

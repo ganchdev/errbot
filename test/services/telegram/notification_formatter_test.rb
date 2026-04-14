@@ -11,7 +11,8 @@ module Telegram
       message = NotificationFormatter.call(event)
 
       assert_match "<b>New issue in #{event.project.name}</b>", message
-      assert_match "<pre>#{event.issue.title}</pre>", message
+      assert_match "app/services/formatter.rb:42:in call", message
+      assert_match "<pre>RuntimeError: boom</pre>", message
       assert_match "<b>Environment:</b> development", message
       assert_match "<b>Release:</b> test", message
       assert_match "<b>Occurred:</b> 2026-04-11 10:30 UTC", message
@@ -27,7 +28,11 @@ module Telegram
     end
 
     test "escapes html-sensitive characters" do
-      event = build_event(reason: "new_issue", issue_title: "boom <bad> & worse")
+      event = build_event(
+        reason: "new_issue",
+        issue_title: "boom <bad> & worse",
+        exception_message: "boom <bad> & worse"
+      )
 
       message = NotificationFormatter.call(event)
 
@@ -36,12 +41,13 @@ module Telegram
 
     private
 
-    def build_event(reason:, environment: "development", issue_title: "Formatter issue")
+    def build_event(reason:, environment: "development", issue_title: "Formatter issue", exception_message: "boom")
       project = projects(:one)
       issue = Issue.create!(
         project: project,
         fingerprint_hash: SecureRandom.hex(16),
         title: issue_title,
+        culprit: "app/services/formatter.rb in call",
         status: "open",
         level: "error",
         platform: "ruby",
@@ -58,10 +64,10 @@ module Telegram
         environment: environment,
         release: "test",
         exception_type: "RuntimeError",
-        exception_message: "boom",
+        exception_message: exception_message,
         handled: false,
         level: "error",
-        raw_json: "{}",
+        raw_json: '{"exception":{"type":"RuntimeError","value":"boom","stacktrace":{"frames":[{"filename":"app/services/formatter.rb","function":"call","lineno":42,"in_app":true}]}}}',
         notification_state: "pending",
         notification_reason: reason
       )

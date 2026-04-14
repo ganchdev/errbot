@@ -10,6 +10,7 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
       project: @project,
       fingerprint_hash: SecureRandom.hex(16),
       title: "Test issue",
+      culprit: "app/services/test_notifier.rb in perform",
       status: "open",
       level: "error",
       platform: "ruby",
@@ -36,6 +37,7 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
     assert event.notified_at.present?
     assert_equal [first_user.chat_id, second_user.chat_id], delivered_chat_ids
     assert_match "<b>New issue in #{@project.name}</b>", delivered_text
+    assert_match "app/services/test_notifier.rb in perform", delivered_text
     assert_match "<pre>", delivered_text
     assert_equal "HTML", fake_client.messages.first[:parse_mode]
   end

@@ -29,4 +29,5 @@ class BotVerifyControllerTest < ActionDispatch::IntegrationTest
     assert_match "Signed-in Google account does not match the requested email", response.body
     assert_nil BotUser.find_by(chat_id: "123456")
   end
+
 end
