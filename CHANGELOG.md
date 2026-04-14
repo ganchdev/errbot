@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.0](https://github.com/ganchdev/errbot/compare/v1.1.0...v1.2.0) (2026-04-14)
+
+
+### Features
+
+* **ui:** add highlight.js to code syntax ([193c581](https://github.com/ganchdev/errbot/commit/193c581bee8350f54602805ec81c94a350a29185))
+* **ui:** add most of the UI ([b03b794](https://github.com/ganchdev/errbot/commit/b03b7941ae5600a2369d8fae2b9305bdc3b3d689))
+* **ui:** reshape issues page ([19580a8](https://github.com/ganchdev/errbot/commit/19580a8f0b13e56408189869592404025ddf0c98))
+* **ui:** setup JS components & copy button example ([4d4b14f](https://github.com/ganchdev/errbot/commit/4d4b14f1f263ffc1bc4ee4d0cd35da1bec7a4da5))
+
 ## [1.1.0](https://github.com/ganchdev/errbot/compare/v1.0.0...v1.1.0) (2026-04-11)
 
 
