@@ -41,6 +41,7 @@ module Telegram
 
     private
 
+    # rubocop:disable Layout/LineLength
     def build_event(reason:, environment: "development", issue_title: "Formatter issue", exception_message: "boom")
       project = projects(:one)
       issue = Issue.create!(
@@ -72,6 +73,7 @@ module Telegram
         notification_reason: reason
       )
     end
+    # rubocop:enable Layout/LineLength
 
   end
 end
