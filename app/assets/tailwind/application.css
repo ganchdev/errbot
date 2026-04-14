@@ -24,3 +24,50 @@
     font: inherit;
   }
 }
+
+@layer components {
+  .hljs {
+    display: block;
+    background: transparent;
+    color: #f4f4f5;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: #a1a1aa;
+    font-style: italic;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-title.class_,
+  .hljs-type {
+    color: #f97316;
+  }
+
+  .hljs-string,
+  .hljs-attr,
+  .hljs-symbol,
+  .hljs-template-variable {
+    color: #86efac;
+  }
+
+  .hljs-number,
+  .hljs-regexp,
+  .hljs-variable,
+  .hljs-title.function_ {
+    color: #fca5a5;
+  }
+
+  .hljs-built_in,
+  .hljs-params,
+  .hljs-property {
+    color: #93c5fd;
+  }
+
+  .hljs-punctuation,
+  .hljs-operator {
+    color: #d4d4d8;
+  }
+}

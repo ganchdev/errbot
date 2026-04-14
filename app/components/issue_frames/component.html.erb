@@ -1,5 +1,5 @@
 <% if normalized_frames.any? %>
-  <div class="space-y-3">
+  <div class="space-y-3" data-controller="issue-frames">
     <% normalized_frames.each_with_index do |frame, index| %>
       <details class="group overflow-hidden rounded-2xl border border-zinc-200/70 bg-zinc-50/80 transition open:bg-white dark:border-zinc-800 dark:bg-zinc-950/40 dark:open:bg-zinc-950/70" <%= "open" if index.zero? %>>
         <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-zinc-900 marker:hidden dark:text-zinc-50">
@@ -13,7 +13,7 @@
               <% frame_source_lines(frame).each do |line| %>
                 <li class="<%= source_line_row_classes(line) %>">
                   <span class="<%= source_line_number_classes(line) %>"><%= line[:number] || " " %></span>
-                  <code class="<%= source_line_code_classes(line) %>"><%= line[:content].presence || " " %></code>
+                  <code class="<%= source_line_code_classes(line) %>" data-issue-frames-target="code"><%= line[:content].presence || " " %></code>
                 </li>
               <% end %>
             </ol>

@@ -51,7 +51,7 @@ module IssueFrames
     end
 
     def source_line_code_classes(_line)
-      "block min-w-0 flex-1 whitespace-pre text-zinc-100"
+      "block min-w-0 flex-1 whitespace-pre text-zinc-100 language-ruby"
     end
 
     private
