@@ -11,6 +11,17 @@ Bundler.require(*Rails.groups)
 module Errbot
   class Application < Rails::Application
 
+    # The path to the root of the application.
+    APP_ROOT = find_root("/")
+
+    # The app version
+    VERSION_PATH = File.join(APP_ROOT, "VERSION")
+    if File.file?(VERSION_PATH)
+      VERSION = File.read(VERSION_PATH).strip.delete_prefix("v")
+    else
+      VERSION = "0.0.0-dev"
+    end
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.2
 
@@ -29,6 +40,11 @@ module Errbot
     config.autoload_paths << Rails.root.join("app/components")
     config.eager_load_paths << Rails.root.join("app/components")
     config.importmap.cache_sweepers << Rails.root.join("app/components")
+
+    # @return [String]
+    def self.version
+      VERSION
+    end
 
   end
 end

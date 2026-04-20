@@ -54,6 +54,9 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
+# Export the version string
+ARG VERSION=0.0.0-unknown
+RUN echo $VERSION > VERSION
 
 # Final stage for app image
 FROM base
