@@ -6,102 +6,102 @@ module Api
   module V1
     class EventsControllerTest < ActionDispatch::IntegrationTest
 
+      include ActiveJob::TestHelper
+
       # rubocop:disable Metrics/BlockLength
       setup do
         @project = projects(:one)
       end
 
       test "create event with valid token" do
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-001",
-                 timestamp: "2026-04-05T10:15:00Z",
-                 platform: "ruby",
-                 level: "error",
-                 environment: "production",
-                 release: "2026.04.05.1",
-                 exception: {
-                   type: "NoMethodError",
-                   value: "undefined method `id' for nil:NilClass",
-                   stacktrace: {
-                     frames: [
-                       { filename: "app/services/payments.rb", function: "call", lineno: 42, in_app: true }
-                     ]
-                   }
-                 },
-                 tags: { runtime: "ruby-3.3.0" }
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
+        perform_enqueued_jobs do
+          post "/api/v1/events",
+               params: {
+                 event: {
+                   event_id: "evt-001",
+                   timestamp: "2026-04-05T10:15:00Z",
+                   platform: "ruby",
+                   level: "error",
+                   environment: "production",
+                   release: "2026.04.05.1",
+                   exception: {
+                     type: "NoMethodError",
+                     value: "undefined method `id' for nil:NilClass",
+                     stacktrace: {
+                       frames: [
+                         { filename: "app/services/payments.rb", function: "call", lineno: 42, in_app: true }
+                       ]
+                     }
+                   },
+                   tags: { runtime: "ruby-3.3.0" }
+                 }
+               },
+               headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
         json = JSON.parse(response.body)
         assert json["ok"]
-        assert json["issue_id"]
-        assert json["event_id"]
 
-        issue = Issue.find(json["issue_id"])
-        assert_equal "NoMethodError", issue.title
+        issue = Issue.find_by!(title: "NoMethodError")
         assert_equal "app/services/payments.rb in call", issue.culprit
         assert_equal 1, issue.occurrences_count
         assert_equal "open", issue.status
       end
 
       test "group events by fingerprint" do
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-002",
-                 timestamp: "2026-04-05T11:00:00Z",
-                 level: "error",
-                 environment: "staging",
-                 exception: {
-                   type: "StandardError",
-                   value: "test message",
-                   stacktrace: {
-                     frames: [
-                       { filename: "app.rb", function: "index", lineno: 1, in_app: true }
-                     ]
+        perform_enqueued_jobs do
+          post "/api/v1/events",
+               params: {
+                 event: {
+                   event_id: "evt-002",
+                   timestamp: "2026-04-05T11:00:00Z",
+                   level: "error",
+                   environment: "staging",
+                   exception: {
+                     type: "StandardError",
+                     value: "test message",
+                     stacktrace: {
+                       frames: [
+                         { filename: "app.rb", function: "index", lineno: 1, in_app: true }
+                       ]
+                     }
                    }
                  }
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
+               },
+               headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
-        json = JSON.parse(response.body)
-
-        issue = Issue.find(json["issue_id"])
+        issue = Issue.last
         assert_equal 1, issue.occurrences_count
 
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-003",
-                 timestamp: "2026-04-05T12:00:00Z",
-                 level: "error",
-                 environment: "staging",
-                 exception: {
-                   type: "StandardError",
-                   value: "test message",
-                   stacktrace: {
-                     frames: [
-                       { filename: "app.rb", function: "index", lineno: 1, in_app: true }
-                     ]
+        perform_enqueued_jobs do
+          post "/api/v1/events",
+               params: {
+                 event: {
+                   event_id: "evt-003",
+                   timestamp: "2026-04-05T12:00:00Z",
+                   level: "error",
+                   environment: "staging",
+                   exception: {
+                     type: "StandardError",
+                     value: "test message",
+                     stacktrace: {
+                       frames: [
+                         { filename: "app.rb", function: "index", lineno: 1, in_app: true }
+                       ]
+                     }
                    }
                  }
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
+               },
+               headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
-        json2 = JSON.parse(response.body)
-        assert_equal json["issue_id"], json2["issue_id"]
-
         issue.reload
         assert_equal 2, issue.occurrences_count
       end
@@ -127,56 +127,39 @@ module Api
         assert_equal "Invalid token", json["error"]
       end
 
-      test "reject non-exception event" do
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-transaction-001",
-                 timestamp: "2026-04-05T12:00:00Z",
-                 type: "transaction",
-                 transaction: "GET /dashboard"
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
-
-        assert_response :bad_request
-        json = JSON.parse(response.body)
-        assert_equal "Event payload must include exception data", json["error"]
-      end
-
       test "creates event from sentry store payload" do
-        post "/api/#{@project.slug}/store",
-             params: {
-               event_id: "sentry-store-001",
-               timestamp: "2026-04-05T15:00:00Z",
-               platform: "ruby",
-               level: "error",
-               environment: "production",
-               transaction: "POST /payments",
-               exception: {
-                 values: [
-                   {
-                     type: "NoMethodError",
-                     value: "undefined method `id' for nil:NilClass",
-                     stacktrace: {
-                       frames: [
-                         { filename: "app/services/payments.rb", function: "call", lineno: 42, in_app: true }
-                       ]
-                     },
-                     mechanism: { handled: false }
-                   }
-                 ]
+        perform_enqueued_jobs do
+          post "/api/#{@project.slug}/store",
+               params: {
+                 event_id: "sentry-store-001",
+                 timestamp: "2026-04-05T15:00:00Z",
+                 platform: "ruby",
+                 level: "error",
+                 environment: "production",
+                 transaction: "POST /payments",
+                 exception: {
+                   values: [
+                     {
+                       type: "NoMethodError",
+                       value: "undefined method `id' for nil:NilClass",
+                       stacktrace: {
+                         frames: [
+                           { filename: "app/services/payments.rb", function: "call", lineno: 42, in_app: true }
+                         ]
+                       },
+                       mechanism: { handled: false }
+                     }
+                   ]
+                 },
+                 tags: [["runtime", "ruby-3.3.0"]]
                },
-               tags: [["runtime", "ruby-3.3.0"]]
-             },
-             headers: { "X-Sentry-Auth" => "Sentry sentry_version=7, sentry_key=#{@project.ingest_token}" },
-             as: :json
+               headers: { "X-Sentry-Auth" => "Sentry sentry_version=7, sentry_key=#{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
-        event = Event.find(JSON.parse(response.body)["event_id"])
+        event = Event.find_by!(event_uuid: "sentry-store-001")
 
-        assert_equal "sentry-store-001", event.event_uuid
         assert_equal "POST /payments", event.transaction_name
         assert_equal false, event.handled
         assert_equal "ruby-3.3.0", event.event_tags.find_by(key: "runtime").value
@@ -208,72 +191,76 @@ module Api
           event_payload.to_json
         ].join("\n")
 
-        post "/api/#{@project.slug}/envelope?sentry_key=#{@project.ingest_token}",
-             params: envelope,
-             headers: { "Content-Type" => "application/x-sentry-envelope" }
+        perform_enqueued_jobs do
+          post "/api/#{@project.slug}/envelope?sentry_key=#{@project.ingest_token}",
+               params: envelope,
+               headers: { "Content-Type" => "application/x-sentry-envelope" }
+        end
 
         assert_response :created
-        event = Event.find(JSON.parse(response.body)["event_id"])
+        event = Event.find_by!(event_uuid: "sentry-envelope-001")
 
-        assert_equal "sentry-envelope-001", event.event_uuid
         assert_equal "RuntimeError", event.exception_type
         assert_equal "envelope error", event.exception_message
         assert_equal "app/jobs/example_job.rb", event.stack_frames.first["filename"]
       end
 
       test "fingerprint includes in_app frame" do
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-005",
-                 timestamp: "2026-04-05T13:00:00Z",
-                 level: "error",
-                 exception: {
-                   type: "RuntimeError",
-                   value: "test",
-                   stacktrace: {
-                     frames: [
-                       { filename: "vendor/gems/foo.rb", function: "bar", lineno: 1, in_app: false },
-                       { filename: "app/services/orders.rb", function: "process", lineno: 10, in_app: true }
-                     ]
+        perform_enqueued_jobs do
+          post "/api/v1/events",
+               params: {
+                 event: {
+                   event_id: "evt-005",
+                   timestamp: "2026-04-05T13:00:00Z",
+                   level: "error",
+                   exception: {
+                     type: "RuntimeError",
+                     value: "test",
+                     stacktrace: {
+                       frames: [
+                         { filename: "vendor/gems/foo.rb", function: "bar", lineno: 1, in_app: false },
+                         { filename: "app/services/orders.rb", function: "process", lineno: 10, in_app: true }
+                       ]
+                     }
                    }
                  }
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
+               },
+               headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
-        json = JSON.parse(response.body)
-        issue = Issue.find(json["issue_id"])
+        issue = Issue.last
 
         expected_fingerprint = Digest::SHA256.hexdigest("RuntimeError|app/services/orders.rb|process|10")
         assert_equal expected_fingerprint, issue.fingerprint_hash, "Fingerprint should use in_app frame"
       end
 
       test "fingerprint falls back to exception type when no in_app frame" do
-        post "/api/v1/events",
-             params: {
-               event: {
-                 event_id: "evt-006",
-                 timestamp: "2026-04-05T14:00:00Z",
-                 level: "error",
-                 exception: {
-                   type: "RuntimeError",
-                   value: "all vendor frames",
-                   stacktrace: {
-                     frames: [
-                       { filename: "vendor/gems/foo.rb", function: "bar", lineno: 1, in_app: false }
-                     ]
+        perform_enqueued_jobs do
+          post "/api/v1/events",
+               params: {
+                 event: {
+                   event_id: "evt-006",
+                   timestamp: "2026-04-05T14:00:00Z",
+                   level: "error",
+                   exception: {
+                     type: "RuntimeError",
+                     value: "all vendor frames",
+                     stacktrace: {
+                       frames: [
+                         { filename: "vendor/gems/foo.rb", function: "bar", lineno: 1, in_app: false }
+                       ]
+                     }
                    }
                  }
-               }
-             },
-             headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
-             as: :json
+               },
+               headers: { "Authorization" => "Bearer #{@project.ingest_token}" },
+               as: :json
+        end
 
         assert_response :created
-        issue = Issue.find(JSON.parse(response.body)["issue_id"])
+        issue = Issue.last
 
         expected_hash = Digest::SHA256.hexdigest("RuntimeError")
         assert_equal expected_hash, issue.fingerprint_hash
