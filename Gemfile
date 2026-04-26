@@ -27,7 +27,7 @@ gem "omniauth-rails_csrf_protection", "2.0.1"
 
 gem "dotenv-rails", "3.2.0"
 
-gem "annotaterb", "4.14.0"
+gem "annotaterb", "4.22.0"
 
 gem "thruster", "0.1.20", require: false
 
