@@ -47,5 +47,5 @@ end
 group :test do
   gem "capybara", "3.40.0"
   gem "minitest-mock"
-  gem "selenium-webdriver", "4.41.0"
+  gem "selenium-webdriver", "4.43.0"
 end
