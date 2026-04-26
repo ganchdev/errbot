@@ -1,0 +1,73 @@
+<% content_for :title, "Uptime Monitor" %>
+
+<section class="flex flex-col gap-3 rounded-[2rem] border border-zinc-200/70 bg-white/90 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+  <div class="space-y-2">
+    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF3300]">Uptime</p>
+    <h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Uptime Monitor</h1>
+    <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+      Live health status for projects with a URL configured. Checks run automatically every 5 minutes.
+    </p>
+  </div>
+</section>
+
+<% if @rows.empty? %>
+  <%= render EmptyState::Component.new(title: "No projects with a URL", message: "Add a URL to a project in the Projects settings to start monitoring its uptime.") %>
+<% else %>
+  <section class="overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-white/90 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+        <thead class="bg-zinc-50/80 dark:bg-zinc-950/70">
+          <tr class="text-left text-xs uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+            <th class="px-6 py-4">Project</th>
+            <th class="px-6 py-4">URL</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Response</th>
+            <th class="px-6 py-4">Last checked</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @rows.each do |project, check| %>
+            <tr>
+              <td class="px-6 py-5">
+                <p class="font-medium text-zinc-950 dark:text-zinc-50"><%= project.name %></p>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400"><%= project.slug %></p>
+              </td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300">
+                <%= link_to project.url, project.url, target: "_blank", rel: "noopener noreferrer", class: "truncate max-w-xs block hover:text-[#FF3300] transition" %>
+              </td>
+              <td class="px-6 py-5">
+                <% if check.nil? %>
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-400/30 bg-zinc-500/10 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-zinc-400"></span>
+                    Pending
+                  </span>
+                <% elsif check.status == "up" %>
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-200">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    Up
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-200">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                    Down
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300">
+                <% if check %>
+                  <p><%= check.response_code || "—" %></p>
+                  <p class="mt-1 text-zinc-500 dark:text-zinc-400"><%= check.response_time_ms ? "#{check.response_time_ms} ms" : "—" %></p>
+                <% else %>
+                  —
+                <% end %>
+              </td>
+              <td class="px-6 py-5 text-sm text-zinc-700 dark:text-zinc-300">
+                <%= check ? check.checked_at.strftime("%Y-%m-%d %H:%M") : "Never" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% end %>

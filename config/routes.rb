@@ -32,5 +32,7 @@ Rails.application.routes.draw do
     end
   end
 
+  get "uptime_monitor", to: "uptime_monitor#index"
+
   root to: "dashboard#index"
 end
