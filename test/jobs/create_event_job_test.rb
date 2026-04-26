@@ -45,14 +45,15 @@ class CreateEventJobTest < ActiveJob::TestCase
 
     event = Event.find(result[:event_id])
     issue = Issue.find(result[:issue_id])
+    telegram_message = TelegramMessage.find_by!(source: event, message_type: "new_issue")
 
     assert_equal @project, event.project
     assert_equal issue, event.issue
     assert_equal "job-evt-001", event.event_uuid
     assert_equal "RuntimeError", event.exception_type
     assert_equal "test error", event.exception_message
-    assert_equal "pending", event.notification_state
     assert_equal "new_issue", event.notification_reason
+    assert_equal "pending", telegram_message.status
     assert_equal 1, issue.occurrences_count
     assert_equal "RuntimeError", issue.title
     assert_equal "app.rb in main", issue.culprit
@@ -100,8 +101,8 @@ class CreateEventJobTest < ActiveJob::TestCase
     issue = Issue.find(result1[:issue_id])
     event = Event.find(result2[:event_id])
     assert_equal 2, issue.occurrences_count
-    assert_equal "skipped", event.notification_state
     assert_nil event.notification_reason
+    assert_nil TelegramMessage.find_by(source: event)
   end
 
   test "creates event tags" do
@@ -172,10 +173,11 @@ class CreateEventJobTest < ActiveJob::TestCase
 
     issue.reload
     event = Event.find(result[:event_id])
+    telegram_message = TelegramMessage.find_by!(source: event, message_type: "reappeared_issue")
 
     assert_equal "open", issue.status
-    assert_equal "pending", event.notification_state
     assert_equal "reappeared", event.notification_reason
+    assert_equal "pending", telegram_message.status
   end
 
   # rubocop:enable Metrics/BlockLength

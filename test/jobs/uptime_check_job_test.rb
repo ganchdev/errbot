@@ -16,7 +16,9 @@ class CheckUptimeJobTest < ActiveJob::TestCase
 
     Net::HTTP.stub :start, -> (*_args, &block) { block.call(mock_http_for_response(mock_response)) } do
       assert_difference "UptimeCheck.count", 1 do
-        CheckUptimeJob.perform_now
+        assert_no_difference "TelegramMessage.count" do
+          CheckUptimeJob.perform_now
+        end
       end
     end
 
@@ -31,22 +33,76 @@ class CheckUptimeJobTest < ActiveJob::TestCase
     mock_response = create_mock_response(404)
 
     Net::HTTP.stub :start, -> (*_args, &block) { block.call(mock_http_for_response(mock_response)) } do
-      CheckUptimeJob.perform_now
+      assert_difference "UptimeCheck.count", 1 do
+        assert_difference "TelegramMessage.count", 1 do
+          assert_enqueued_jobs 1, only: NotifyTelegramJob do
+            CheckUptimeJob.perform_now
+          end
+        end
+      end
     end
 
     uptime_check = @project_with_url.uptime_checks.last
     assert_equal "down", uptime_check.status
     assert_equal 404, uptime_check.response_code
+    assert_equal "project_down", TelegramMessage.last.message_type
+    assert_equal uptime_check, TelegramMessage.last.source
   end
 
   test "marks project as down when request fails" do
     Net::HTTP.stub :start, -> (*_args) { raise Net::OpenTimeout } do
-      CheckUptimeJob.perform_now
+      assert_difference "UptimeCheck.count", 1 do
+        assert_difference "TelegramMessage.count", 1 do
+          assert_enqueued_jobs 1, only: NotifyTelegramJob do
+            CheckUptimeJob.perform_now
+          end
+        end
+      end
     end
 
     uptime_check = @project_with_url.uptime_checks.last
     assert_equal "down", uptime_check.status
     assert_nil uptime_check.response_code
+  end
+
+  test "does not enqueue a duplicate alert when a project stays down" do
+    @project_with_url.uptime_checks.create!(
+      status: "down",
+      checked_at: 5.minutes.ago,
+      response_code: 503,
+      response_time_ms: 100
+    )
+    mock_response = create_mock_response(503)
+
+    Net::HTTP.stub :start, -> (*_args, &block) { block.call(mock_http_for_response(mock_response)) } do
+      assert_difference "UptimeCheck.count", 1 do
+        assert_no_difference "TelegramMessage.count" do
+          assert_no_enqueued_jobs only: NotifyTelegramJob do
+            CheckUptimeJob.perform_now
+          end
+        end
+      end
+    end
+  end
+
+  test "enqueues a down alert when a project transitions from up to down" do
+    @project_with_url.uptime_checks.create!(
+      status: "up",
+      checked_at: 5.minutes.ago,
+      response_code: 200,
+      response_time_ms: 90
+    )
+    mock_response = create_mock_response(500)
+
+    Net::HTTP.stub :start, -> (*_args, &block) { block.call(mock_http_for_response(mock_response)) } do
+      assert_difference "UptimeCheck.count", 1 do
+        assert_difference "TelegramMessage.count", 1 do
+          assert_enqueued_jobs 1, only: NotifyTelegramJob do
+            CheckUptimeJob.perform_now
+          end
+        end
+      end
+    end
   end
 
   test "skips projects without URLs" do

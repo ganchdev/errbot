@@ -1,40 +1,42 @@
 # frozen_string_literal: true
 
-# Sends a pending event notification to all linked Telegram chats.
+# Sends a pending Telegram notification to all linked Telegram chats.
 #
-# The job is intentionally delivery-only: eligibility is decided upstream
-# during ingestion so retries remain isolated to Telegram send failures.
+# The job is intentionally delivery-only: message eligibility is decided
+# upstream so retries remain isolated to Telegram send failures.
 class NotifyTelegramJob < ApplicationJob
 
   queue_as :notifications
 
   retry_on Telegram::Error, wait: :polynomially_longer, attempts: 3 do |job, _error|
-    Event.find_by(id: job.arguments.first)&.update!(notification_state: "failed")
+    TelegramMessage.find_by(id: job.arguments.first)&.update!(status: "failed")
   end
 
-  # Delivers a pending notification event to all linked Telegram bot users.
+  # Delivers a pending Telegram message to all linked bot users.
   #
-  # @param event_id [Integer]
+  # @param telegram_message_id [Integer]
   # @return [void]
-  def perform(event_id)
-    event = Event.includes(:project, :issue).find_by(id: event_id)
-    return if event.nil? || event.notification_state != "pending"
+  def perform(telegram_message_id)
+    telegram_message = TelegramMessage.find_by(id: telegram_message_id)
+
+    return if telegram_message.nil? || telegram_message.status != "pending"
+    return telegram_message.update!(status: "skipped") if telegram_message.source.nil?
 
     bot_users = BotUser.linked.includes(:authorized_user).to_a
 
     if bot_users.empty?
-      event.update!(notification_state: "skipped")
+      telegram_message.update!(status: "skipped")
       return
     end
 
-    message = Telegram::NotificationFormatter.call(event)
+    message = Telegram::MessageFormatter.call(telegram_message)
     client = build_client
 
     bot_users.each do |bot_user|
       client.send_message(chat_id: bot_user.chat_id, text: message, parse_mode: "HTML")
     end
 
-    event.update!(notification_state: "sent", notified_at: Time.current)
+    telegram_message.update!(status: "sent", sent_at: Time.current)
   end
 
   private

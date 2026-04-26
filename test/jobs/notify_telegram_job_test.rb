@@ -18,23 +18,26 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
       last_seen_at: Time.current,
       occurrences_count: 1
     )
+    ActiveJob::Base.queue_adapter = :test
+    clear_enqueued_jobs
+    clear_performed_jobs
   end
 
-  test "sends pending event notifications to all linked bot users" do
-    event = create_event!
+  test "sends pending telegram messages to all linked bot users" do
+    telegram_message = create_event_message!
     first_user = create_linked_bot_user("111")
     second_user = create_linked_bot_user("222", authorized_users(:two))
     fake_client = FakeClient.new
-    job = TestNotifyTelegramJob.new(fake_client)
+    TestNotifyTelegramJob.client = fake_client
 
-    job.perform(event.id)
+    TestNotifyTelegramJob.perform_now(telegram_message.id)
 
-    event.reload
+    telegram_message.reload
     delivered_chat_ids = fake_client.messages.map { |message| message[:chat_id] }
     delivered_text = fake_client.messages.first[:text]
 
-    assert_equal "sent", event.notification_state
-    assert event.notified_at.present?
+    assert_equal "sent", telegram_message.status
+    assert telegram_message.sent_at.present?
     assert_equal [first_user.chat_id, second_user.chat_id], delivered_chat_ids
     assert_match "<b>New issue in #{@project.name}</b>", delivered_text
     assert_match "app/services/test_notifier.rb in perform", delivered_text
@@ -50,28 +53,43 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
     assert_equal "Markdown", client.messages.first[:parse_mode]
   end
 
-  test "marks event skipped when there are no linked bot users" do
-    event = create_event!
+  test "marks telegram message skipped when there are no linked bot users" do
+    telegram_message = create_event_message!
 
-    NotifyTelegramJob.perform_now(event.id)
+    NotifyTelegramJob.perform_now(telegram_message.id)
 
-    event.reload
-    assert_equal "skipped", event.notification_state
-    assert_nil event.notified_at
+    telegram_message.reload
+    assert_equal "skipped", telegram_message.status
+    assert_nil telegram_message.sent_at
   end
 
-  test "ignores events that are not pending" do
-    event = create_event!(notification_state: "sent", notified_at: Time.current)
+  test "ignores telegram messages that are not pending" do
+    telegram_message = create_event_message!(status: "sent", sent_at: Time.current)
 
-    NotifyTelegramJob.perform_now(event.id)
+    NotifyTelegramJob.perform_now(telegram_message.id)
 
-    event.reload
-    assert_equal "sent", event.notification_state
+    telegram_message.reload
+    assert_equal "sent", telegram_message.status
+  end
+
+  test "marks telegram message failed when telegram delivery exhausts retries" do
+    telegram_message = create_event_message!
+    create_linked_bot_user("111")
+    fake_client = RaisingClient.new
+    TestNotifyTelegramJob.client = fake_client
+
+    perform_enqueued_jobs do
+      TestNotifyTelegramJob.perform_later(telegram_message.id)
+    end
+
+    telegram_message.reload
+    assert_equal "failed", telegram_message.status
+    assert_nil telegram_message.sent_at
   end
 
   private
 
-  def create_event!(notification_state: "pending", notification_reason: "new_issue", notified_at: nil)
+  def create_event!(notification_state: "pending", notification_reason: "new_issue")
     Event.create!(
       project: @project,
       issue: @issue,
@@ -85,8 +103,18 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
       level: "error",
       raw_json: "{}",
       notification_state: notification_state,
-      notification_reason: notification_reason,
-      notified_at: notified_at
+      notification_reason: notification_reason
+    )
+  end
+
+  def create_event_message!(status: "pending", message_type: "new_issue", sent_at: nil)
+    event = create_event!(notification_reason: message_type == "reappeared_issue" ? "reappeared" : "new_issue")
+
+    TelegramMessage.create!(
+      source: event,
+      message_type: message_type,
+      status: status,
+      sent_at: sent_at
     )
   end
 
@@ -110,17 +138,21 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
 
   end
 
-  class TestNotifyTelegramJob < NotifyTelegramJob
+  class RaisingClient
 
-    def initialize(client)
-      super()
-      @client = client
+    def send_message(**)
+      raise Telegram::Error, "boom"
     end
+
+  end
+
+  class TestNotifyTelegramJob < NotifyTelegramJob
+    class_attribute :client
 
     private
 
     def build_client
-      @client
+      self.class.client
     end
 
   end

@@ -15,6 +15,7 @@ class CheckUptimeJob < ApplicationJob
   private
 
   def check_project(project)
+    previous_check = project.uptime_checks.order(checked_at: :desc, id: :desc).first
     uri = URI.parse(project.url)
     started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
@@ -33,12 +34,17 @@ class CheckUptimeJob < ApplicationJob
 
     elapsed_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at) * 1000).round
 
-    project.uptime_checks.create!(
+    uptime_check = project.uptime_checks.create!(
       status: status,
       checked_at: Time.current,
       response_code: response_code,
       response_time_ms: elapsed_ms
     )
+
+    return unless status == "down"
+    return if previous_check&.status == "down"
+
+    TelegramMessage.enqueue_for!(source: uptime_check, message_type: "project_down")
   end
 
 end

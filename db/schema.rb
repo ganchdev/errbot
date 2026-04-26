@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_23_072155) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_26_090000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -110,6 +110,18 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_23_072155) do
     t.string "user_agent"
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "telegram_messages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "message_type", null: false
+    t.datetime "sent_at"
+    t.integer "source_id", null: false
+    t.string "source_type", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_type", "source_id", "message_type"], name: "index_telegram_messages_on_source_and_message_type", unique: true
+    t.index ["status"], name: "index_telegram_messages_on_status"
   end
 
   create_table "uptime_checks", force: :cascade do |t|

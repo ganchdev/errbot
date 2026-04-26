@@ -25,6 +25,7 @@
 class UptimeCheck < ApplicationRecord
 
   belongs_to :project
+  has_many :telegram_messages, as: :source, dependent: :destroy
 
   STATUSES = %w[up down].freeze
 
