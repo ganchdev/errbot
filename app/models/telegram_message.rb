@@ -25,7 +25,7 @@ class TelegramMessage < ApplicationRecord
 
   belongs_to :source, polymorphic: true
 
-  validates :message_type, inclusion: { in: MESSAGE_TYPES }, uniqueness: { scope: %i[source_type source_id] }
+  validates :message_type, inclusion: { in: MESSAGE_TYPES }, uniqueness: { scope: [:source_type, :source_id] }
   validates :status, inclusion: { in: STATUSES }
 
   def self.enqueue_for!(source:, message_type:)

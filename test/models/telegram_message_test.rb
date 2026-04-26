@@ -6,6 +6,7 @@ class TelegramMessageTest < ActiveSupport::TestCase
 
   include ActiveJob::TestHelper
 
+  # rubocop:disable Metrics/BlockLength
   setup do
     @project = projects(:one)
     @issue = Issue.create!(
@@ -36,6 +37,7 @@ class TelegramMessageTest < ActiveSupport::TestCase
       notification_state: "pending"
     )
   end
+  # rubocop:enable Metrics/BlockLength
 
   test "validates allowed message types and statuses" do
     message = TelegramMessage.new(source: @event, message_type: "not_real", status: "unknown")

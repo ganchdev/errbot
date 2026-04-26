@@ -147,6 +147,7 @@ class NotifyTelegramJobTest < ActiveJob::TestCase
   end
 
   class TestNotifyTelegramJob < NotifyTelegramJob
+
     class_attribute :client
 
     private
