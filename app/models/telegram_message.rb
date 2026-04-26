@@ -20,7 +20,7 @@
 #
 class TelegramMessage < ApplicationRecord
 
-  MESSAGE_TYPES = %w[new_issue reappeared_issue project_down].freeze
+  MESSAGE_TYPES = %w[new_issue reappeared_issue project_down ssl_certificate_warning].freeze
   STATUSES = %w[pending sent skipped failed].freeze
 
   belongs_to :source, polymorphic: true
@@ -28,6 +28,12 @@ class TelegramMessage < ApplicationRecord
   validates :message_type, inclusion: { in: MESSAGE_TYPES }, uniqueness: { scope: [:source_type, :source_id] }
   validates :status, inclusion: { in: STATUSES }
 
+  # Finds or creates a deliverable Telegram message for the given source and
+  # enqueues delivery only when a new message record was created.
+  #
+  # @param source [Event, UptimeCheck]
+  # @param message_type [String]
+  # @return [TelegramMessage]
   def self.enqueue_for!(source:, message_type:)
     telegram_message = find_or_create_by!(source: source, message_type: message_type) do |message|
       message.status = "pending"

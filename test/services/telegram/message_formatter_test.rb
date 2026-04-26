@@ -35,16 +35,34 @@ module Telegram
       assert_match "<b>Project down: #{uptime_message.source.project.name}</b>", message
       assert_match "<b>URL:</b> https://example.com/health", message
       assert_match "<b>Status:</b> HTTP 503", message
+      assert_match "<b>SSL:</b> Valid", message
       assert_match "<b>Response time:</b> 245 ms", message
       assert_match "<b>Checked:</b> 2026-04-11 10:30 UTC", message
     end
 
     test "formats a project down notification without a response code" do
-      uptime_message = build_uptime_message(response_code: nil)
+      uptime_message = build_uptime_message(response_code: nil, ssl_status: "error", ssl_error: "handshake failure")
 
       message = MessageFormatter.call(uptime_message)
 
       assert_match "<b>Status:</b> No response", message
+      assert_match "<b>SSL:</b> handshake failure", message
+    end
+
+    test "formats an ssl certificate warning notification" do
+      uptime_message = build_uptime_message(
+        response_code: 200,
+        ssl_status: "expiring_soon",
+        ssl_expires_at: Time.utc(2026, 4, 20, 10, 30, 0)
+      )
+      uptime_message.update!(message_type: "ssl_certificate_warning")
+
+      message = MessageFormatter.call(uptime_message)
+
+      assert_match "<b>SSL certificate expiring soon: #{uptime_message.source.project.name}</b>", message
+      assert_match "<b>URL:</b> https://example.com/health", message
+      assert_match "<b>Expires:</b> 2026-04-20 10:30 UTC", message
+      assert_match "<b>Time remaining:</b> 9 days", message
     end
 
     test "escapes html-sensitive characters in event and uptime messages" do
@@ -100,7 +118,13 @@ module Telegram
       TelegramMessage.create!(source: event, message_type: message_type, status: "pending")
     end
 
-    def build_uptime_message(response_code: nil, response_time_ms: 132, project_name: "Storefront API", url: "https://example.com/health")
+    def build_uptime_message(response_code: nil,
+                             response_time_ms: 132,
+                             project_name: "Storefront API",
+                             url: "https://example.com/health",
+                             ssl_status: "valid",
+                             ssl_expires_at: Time.utc(2026, 5, 11, 10, 30, 0),
+                             ssl_error: nil)
       project = Project.create!(
         name: project_name,
         slug: "uptime-#{SecureRandom.hex(4)}",
@@ -113,7 +137,10 @@ module Telegram
         status: "down",
         checked_at: Time.utc(2026, 4, 11, 10, 30, 0),
         response_code: response_code,
-        response_time_ms: response_time_ms
+        response_time_ms: response_time_ms,
+        ssl_status: ssl_status,
+        ssl_expires_at: ssl_expires_at,
+        ssl_error: ssl_error
       )
 
       TelegramMessage.create!(source: uptime_check, message_type: "project_down", status: "pending")

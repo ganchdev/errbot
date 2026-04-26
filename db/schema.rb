@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_26_090000) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_26_100000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -130,10 +130,14 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_26_090000) do
     t.integer "project_id", null: false
     t.integer "response_code"
     t.integer "response_time_ms"
+    t.string "ssl_error"
+    t.datetime "ssl_expires_at"
+    t.string "ssl_status", default: "not_applicable", null: false
     t.string "status", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id", "checked_at"], name: "index_uptime_checks_on_project_id_and_checked_at"
     t.index ["project_id"], name: "index_uptime_checks_on_project_id"
+    t.index ["ssl_expires_at"], name: "index_uptime_checks_on_ssl_expires_at"
   end
 
   create_table "users", force: :cascade do |t|
