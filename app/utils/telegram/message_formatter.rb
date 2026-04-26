@@ -78,7 +78,10 @@ module Telegram
       [
         "<b>#{escaped_text(ssl_warning_title)}: #{escaped_text(uptime_check.project.name)}</b>",
         formatted_field("URL", uptime_check.project.url),
-        (formatted_field("Expires", formatted_timestamp(uptime_check.ssl_expires_at)) if uptime_check.ssl_expires_at.present?),
+        (if uptime_check.ssl_expires_at.present?
+           formatted_field("Expires",
+                           formatted_timestamp(uptime_check.ssl_expires_at))
+         end),
         (formatted_field("Time remaining", ssl_time_remaining_label) if uptime_check.ssl_expires_at.present?),
         formatted_field("Checked", formatted_timestamp(uptime_check.checked_at))
       ].compact.join("\n")
