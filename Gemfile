@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "importmap-rails", "2.2.3"
 gem "jbuilder", "2.14.1"
-gem "propshaft", "1.3.1"
+gem "propshaft", "1.3.2"
 gem "puma", "7.2.0"
 gem "rails", github: "rails/rails", branch: "main"
 gem "sqlite3", "2.9.2"
