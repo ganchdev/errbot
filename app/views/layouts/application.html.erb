@@ -30,9 +30,17 @@
             <!-- Primary navigation -->
             <nav class="flex flex-wrap items-center gap-2 text-sm">
               <%= link_to "Issues", root_path, class: "rounded-full px-3 py-2 text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
+              <%= link_to "Uptime", uptime_monitor_path, class: "rounded-full px-3 py-2 text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
               <% if Current.user&.admin? %>
-                <%= link_to "Authorized Users", authorized_users_path, class: "rounded-full px-3 py-2 text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
-                <%= link_to "Projects", projects_path, class: "rounded-full px-3 py-2 text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
+                <div class="group relative">
+                  <button type="button" class="cursor-pointer rounded-full px-3 py-2 text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950">
+                    Admin
+                  </button>
+                  <div class="absolute left-0 top-full mt-1 hidden w-48 flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg group-hover:flex dark:border-zinc-800 dark:bg-zinc-900">
+                    <%= link_to "Authorized Users", authorized_users_path, class: "block rounded-lg px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
+                    <%= link_to "Projects", projects_path, class: "block rounded-lg px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-950 hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-zinc-950" %>
+                  </div>
+                </div>
               <% end %>
             </nav>
             <span class="text-zinc-400 dark:text-zinc-600">|</span>

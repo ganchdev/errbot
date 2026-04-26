@@ -47,6 +47,7 @@ class Event < ApplicationRecord
   belongs_to :project
   belongs_to :issue
   has_many :event_tags, dependent: :destroy
+  has_many :telegram_messages, as: :source, dependent: :destroy
 
   validates :notification_reason, inclusion: { in: NOTIFICATION_REASONS }, allow_nil: true
   validates :notification_state, inclusion: { in: NOTIFICATION_STATES }

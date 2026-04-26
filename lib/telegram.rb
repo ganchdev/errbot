@@ -11,15 +11,17 @@ module Telegram
   def self.run
     $stdout.sync = true
 
-    bot_token = ENV.fetch("TELEGRAM_BOT_TOKEN") do
-      raise "Missing TELEGRAM_BOT_TOKEN"
+    logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new($stdout))
+    logger.level = Rails.logger.level
+
+    bot_token = ENV.fetch("TELEGRAM_BOT_TOKEN", nil)
+    if bot_token.nil? || bot_token.empty?
+      logger.info("Skipping Telegram polling: TELEGRAM_BOT_TOKEN is not set")
+      sleep
     end
 
     timeout = ENV.fetch("TELEGRAM_POLL_TIMEOUT", Poller::DEFAULT_TIMEOUT_SECONDS).to_i
     error_backoff = ENV.fetch("TELEGRAM_POLL_ERROR_BACKOFF", Poller::DEFAULT_BACKOFF_SECONDS).to_i
-
-    logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new($stdout))
-    logger.level = Rails.logger.level
 
     client = Client.new(bot_token: bot_token, logger: logger)
     handler = UpdateHandler.new(client: client, logger: logger)

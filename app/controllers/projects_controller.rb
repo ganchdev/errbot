@@ -49,7 +49,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :slug, :default_environment)
+    params.require(:project).permit(:name, :slug, :default_environment, :url)
   end
 
 end

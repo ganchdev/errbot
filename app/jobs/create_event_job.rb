@@ -13,16 +13,18 @@ class CreateEventJob < ApplicationJob
   def perform(project_id:, event_payload:, raw_json:)
     project = Project.find(project_id)
     normalized_event = Ingestion::EventNormalizer.call(event_payload, raw_json: raw_json)
-    enqueue_notification = false
+    notification_message_type = nil
+    event_to_notify = nil
 
     result = Event.transaction do
       fingerprint_hash = Ingestion::FingerprintBuilder.call(normalized_event)
       issue, issue_state = find_or_create_issue(project, normalized_event, fingerprint_hash)
       event = create_event(project, issue, normalized_event, issue_state[:notification_reason])
+      notification_message_type = telegram_message_type_for(event.notification_reason)
+      event_to_notify = event if notification_message_type.present?
 
       create_event_tags(event, normalized_event)
       update_issue(issue, event, normalized_event, issue_state)
-      enqueue_notification = event.notification_state == "pending"
 
       {
         issue_id: issue.id,
@@ -32,7 +34,10 @@ class CreateEventJob < ApplicationJob
       }
     end
 
-    NotifyTelegramJob.perform_later(result[:event_id]) if enqueue_notification
+    if notification_message_type.present?
+      TelegramMessage.enqueue_for!(source: event_to_notify,
+                                   message_type: notification_message_type)
+    end
 
     result
   end
@@ -149,6 +154,19 @@ class CreateEventJob < ApplicationJob
     return "open" if issue_state[:notification_reason] == "reappeared"
 
     issue.status
+  end
+
+  # Maps domain notification reasons to Telegram message types.
+  #
+  # @param notification_reason [String, nil]
+  # @return [String, nil]
+  def telegram_message_type_for(notification_reason)
+    case notification_reason
+    when "new_issue"
+      "new_issue"
+    when "reappeared"
+      "reappeared_issue"
+    end
   end
 
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_04_11_133000) do
+ActiveRecord::Schema[8.2].define(version: 2026_04_26_090000) do
   create_table "authorized_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address"
@@ -98,6 +98,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_11_133000) do
     t.string "name", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
+    t.string "url"
     t.index ["ingest_token"], name: "index_projects_on_ingest_token", unique: true
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end
@@ -109,6 +110,30 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_11_133000) do
     t.string "user_agent"
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "telegram_messages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "message_type", null: false
+    t.datetime "sent_at"
+    t.integer "source_id", null: false
+    t.string "source_type", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_type", "source_id", "message_type"], name: "index_telegram_messages_on_source_and_message_type", unique: true
+    t.index ["status"], name: "index_telegram_messages_on_status"
+  end
+
+  create_table "uptime_checks", force: :cascade do |t|
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.integer "project_id", null: false
+    t.integer "response_code"
+    t.integer "response_time_ms"
+    t.string "status", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "checked_at"], name: "index_uptime_checks_on_project_id_and_checked_at"
+    t.index ["project_id"], name: "index_uptime_checks_on_project_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -129,4 +154,5 @@ ActiveRecord::Schema[8.2].define(version: 2026_04_11_133000) do
   add_foreign_key "events", "projects"
   add_foreign_key "issues", "projects"
   add_foreign_key "sessions", "users"
+  add_foreign_key "uptime_checks", "projects"
 end

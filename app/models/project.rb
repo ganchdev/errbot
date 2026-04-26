@@ -21,6 +21,9 @@ class Project < ApplicationRecord
 
   has_many :issues, dependent: :destroy
   has_many :events, dependent: :destroy
+  has_many :uptime_checks, dependent: :destroy
+
+  scope :with_url, -> { where.not(url: [nil, ""]) }
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
