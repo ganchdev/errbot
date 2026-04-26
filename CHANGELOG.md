@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/ganchdev/errbot/compare/v1.2.0...v1.3.0) (2026-04-26)
+
+
+### Features
+
+* add SSL checks to uptime monitor ([#19](https://github.com/ganchdev/errbot/issues/19)) ([f45cb78](https://github.com/ganchdev/errbot/commit/f45cb781aaf902973468bf8aec69946a3243a3d3))
+* uptime monitor   ([#17](https://github.com/ganchdev/errbot/issues/17)) ([b868aca](https://github.com/ganchdev/errbot/commit/b868aca35499be3764403156607654fb7998727a))
+
 ## [1.2.0](https://github.com/ganchdev/errbot/compare/v1.1.0...v1.2.0) (2026-04-20)
 
 
