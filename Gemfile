@@ -11,7 +11,7 @@ gem "sqlite3", "2.9.2"
 gem "stimulus-rails", "1.3.4"
 gem "tailwindcss-rails", "4.4.0"
 gem "turbo-rails", "2.0.23"
-gem "view_component", "~> 4.6.0"
+gem "view_component", "~> 4.8.0"
 
 gem "tzinfo-data", platforms: [:windows, :jruby]
 
