@@ -1,0 +1,28 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SSL Verification Bypass",
+      "warning_code": 71,
+      "fingerprint": "ac2d6c25b65588f2d9f1505994c97e261468f43f4f0bdfd60692c46db0eae6b4",
+      "check_name": "SSLVerify",
+      "message": "SSL certificate verification was bypassed",
+      "file": "app/utils/uptime/ssl_inspector.rb",
+      "line": 67,
+      "link": "https://brakemanscanner.org/docs/warning_types/ssl_verification_bypass/",
+      "code": "OpenSSL::SSL::SSLContext.new.verify_mode = OpenSSL::SSL::VERIFY_NONE",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Uptime::SslInspector",
+        "method": "fetch_certificate"
+      },
+      "user_input": null,
+      "confidence": "High",
+      "cwe_id": [
+        295
+      ],
+      "note": "Intentional for uptime certificate monitoring. This path inspects presented certificates, including invalid or expired ones, and does not protect sensitive application traffic."
+    }
+  ],
+  "brakeman_version": "8.0.4"
+}
