@@ -112,7 +112,7 @@ GEM
     base64 (0.3.0)
     bigdecimal (4.1.1)
     bindex (0.8.1)
-    bootsnap (1.23.0)
+    bootsnap (1.24.0)
       msgpack (~> 1.2)
     brakeman (8.0.4)
       racc
@@ -428,7 +428,7 @@ PLATFORMS
 
 DEPENDENCIES
   annotaterb (= 4.14.0)
-  bootsnap (= 1.23.0)
+  bootsnap (= 1.24.0)
   brakeman (= 8.0.4)
   bundler-audit (= 0.9.3)
   capybara (= 3.40.0)

@@ -19,7 +19,7 @@ gem "solid_cable", "3.0.12"
 gem "solid_cache", "1.0.10"
 gem "solid_queue", "1.4.0"
 
-gem "bootsnap", "1.23.0", require: false
+gem "bootsnap", "1.24.0", require: false
 
 gem "omniauth", "2.1.4"
 gem "omniauth-google-oauth2", "1.2.2"
