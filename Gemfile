@@ -40,7 +40,7 @@ group :development, :test do
 end
 
 group :development do
-  gem "rubocop", "1.86.0", require: false
+  gem "rubocop", "1.86.1", require: false
   gem "web-console", "4.3.0"
 end
 
